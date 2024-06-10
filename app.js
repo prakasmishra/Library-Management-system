@@ -29,9 +29,6 @@ let driver = neo4j.driver(NEO4J_URI, neo4j.auth.basic(NEO4J_USERNAME, NEO4J_PASS
     }
 })();
 
-
-// let session = driver.session();
-
 app.post('/createNodes', async (req, res) => {
     for (let person of people) {
         await driver.executeQuery(
@@ -72,9 +69,7 @@ app.get('/getFriends', async (req, res) => {
     { database: 'neo4j' }
   )
 
-  // Loop through results and do something with them
   for(let person of result.records) {
-    // `person.friend` is an object of type `Node`
     console.log(person.get('friend'))
   }
 });
