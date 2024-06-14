@@ -1,13 +1,15 @@
 import express from "express";
-import dotenv from "dotenv";
 import connectToDB from "./db/connectToDB.js";
 
+import checkRoutes from "./routes/checkRoutes.js";
+
 const app = express();
-dotenv.config();
 
 const PORT = process.env.PORT;
 
 app.use(express.json());
+
+app.use("/api/developer", checkRoutes);
 
 app.listen(PORT, () => {
     connectToDB();
