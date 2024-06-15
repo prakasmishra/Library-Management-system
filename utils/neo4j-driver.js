@@ -14,3 +14,8 @@ const driver = neo4j.driver(NEO4J_URI, neo4j.auth.basic(NEO4J_USERNAME, NEO4J_PA
 
 // Export the driver
 export default driver;
+
+// Export Neo4j Integer conversion method
+export const convertToNeo4jInteger = (x) => {
+    return neo4j.int(x);
+}
