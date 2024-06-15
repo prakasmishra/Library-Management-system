@@ -7,11 +7,13 @@ export const currentlyBorrowedBooks = async (req, res) => {
     RETURN b
     `, {member_id : memberId}
     )
+    const response=[];
     for (let book of result.records) {
         console.log(book.get('b').properties);
+        response.push(book.get('b').properties);
     }
     // console.log(result.records._fields.properties);
-    res.status(200).send({ message : "currently borrowed books api controller"});
+    res.status(200).send(response);
 }
 
 export const borrowingHistory = async (req, res) => {
