@@ -10,7 +10,10 @@ const NEO4J_USERNAME = process.env.NEO4J_USERNAME;
 const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD;
 
 // Create a driver instance
-const driver = neo4j.driver(NEO4J_URI, neo4j.auth.basic(NEO4J_USERNAME, NEO4J_PASSWORD));
+const driver = neo4j.driver(
+  NEO4J_URI,
+  neo4j.auth.basic(NEO4J_USERNAME, NEO4J_PASSWORD)
+);
 
 // Export the driver
 export default driver;
