@@ -1,4 +1,4 @@
-import driver from "../../utils/neo4j-driver.js";
+import driver from "../../../utils/neo4j-driver.js";
 
 export const profileHome = async (req, res) => {
   const id = req.params.id;
@@ -13,6 +13,6 @@ export const profileHome = async (req, res) => {
     res.send(result.records.at(0)._fields.at(0).properties).status(200);
   } catch (error) {
     console.log("Error at extracting data");
-    res.send({ message: "Error in extracting" }).status(400);
+    res.send({ message: "Record Does not exists" }).status(500);
   }
 };
