@@ -20,7 +20,7 @@ export const searchBooks = asyncHandler(async (req, res) => {
   const limit = convertToNeo4jInteger(10);
 
   // querying the db
-
+  // check for better regex
   const regexQuery = decodedStringValue.split('').map(char => `${char}.*`).join('');
   const regex = `(?i).*${regexQuery}`; // Case-insensitive subsequence match
 
@@ -32,7 +32,7 @@ export const searchBooks = asyncHandler(async (req, res) => {
 WHERE book.title =~ $regex 
 OR author.author_name =~ $regex
 OR subject.sub_name =~ $regex
-RETURN book
+RETURN book,author.author_name AS author_name,subject.sub_name AS sub_name
 LIMIT $limit
 `;
 
