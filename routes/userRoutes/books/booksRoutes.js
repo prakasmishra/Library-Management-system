@@ -3,7 +3,7 @@ import {reserveBook ,wishlistBook} from "../../../controllers/userControllers/bo
 
 const router=express.Router();
 
-router.post('/reserve/:isbn',reserveBook);
-router.post('/wishlist/:isbn',wishlistBook); //range (query parameter)
+router.post('/reserve/:isbn/:memberId',reserveBook);
+router.post('/wishlist/:isbn/:memberId',wishlistBook);
 
 export default router; 
