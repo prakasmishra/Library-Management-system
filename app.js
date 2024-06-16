@@ -23,13 +23,20 @@ app.use(express.json());
 // Routes
 app.use("/api/developer", checkRoutes);
 
+
+// user
+
 app.use("/api/user/myBooks", myBooksRoutes);
 app.use("/api/user/book/browse", booksRoutes);
 app.use("/api/user/profile", profileRoutes);
 app.use("/api/user/auth", addDetailsRoutes);
 //user/book/browse
 
+
+// admin
 app.use("/api/admin",adminRoutes);
+
+// common for search books
 app.use("/api/common",commonRoutes);
 
 
