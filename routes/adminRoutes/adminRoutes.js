@@ -1,15 +1,15 @@
 import express from 'express';
 
-import { addNewBook } from '../../controllers/adminControllers/BookControllers/AddNewBook.js';
-import { editBook } from '../../controllers/adminControllers/BookControllers/EditBook.js';
-import { deleteBook } from '../../controllers/adminControllers/BookControllers/DeleteBook.js';
+import { addNewBook } from '../../controllers/adminControllers/BookControllers/addNewBook.js';
+import { editBook } from '../../controllers/adminControllers/BookControllers/editBook.js';
+import { deleteBook } from '../../controllers/adminControllers/BookControllers/deleteBook.js';
 import { checkISBNStatus } from '../../controllers/adminControllers/BookControllers/checkISBNStatus.js';
 import { getBook } from '../../controllers/adminControllers/BookControllers/getBook.js';
 import { updateBookAvailability } from '../../controllers/adminControllers/BookControllers/updateBookAvailability.js';
-import { totalBooks } from '../../controllers/adminControllers/statisticsControllers/totalBooks.js';
-import { totalMembers } from '../../controllers/adminControllers/statisticsControllers/totalMembers.js';
-import { issueNotice } from '../../controllers/adminControllers/noticeControllers/issueNotice.js';
-import { obsoleteNotice } from '../../controllers/adminControllers/noticeControllers/obsoleteNotice.js';
+import { totalBooks } from '../../controllers/adminControllers/StatisticsControllers/totalBooks.js';
+import { totalMembers } from '../../controllers/adminControllers/StatisticsControllers/totalMembers.js';
+import { issueNotice } from '../../controllers/adminControllers/NoticeControllers/issueNotice.js';
+import { obsoleteNotice } from '../../controllers/adminControllers/NoticeControllers/obsoleteNotice.js';
 import { libraryInfo } from '../../controllers/adminControllers/LibraryInfoControllers/libraryInfo.js';
 import { issueBook } from '../../controllers/adminControllers/TransactionControllers/issueBook.js';
 import { returnBook } from '../../controllers/adminControllers/TransactionControllers/returnBook.js';

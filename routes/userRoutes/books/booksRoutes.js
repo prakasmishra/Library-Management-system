@@ -7,8 +7,7 @@ import {
 
 const router = express.Router();
 
-router.post("/reserve/:isbn/:memberId", reserveBook);
-router.post("/wishlist/:isbn/:memberId", wishlistBook);
 router.get("/recommendation", recommendedBooks);
-
+router.post('/reserve/isbn/:isbn/memberId/:memberId',reserveBook);
+router.post('/wishlist/isbn/:isbn/memberId/:memberId',wishlistBook);
 export default router;
