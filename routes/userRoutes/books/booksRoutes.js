@@ -1,9 +1,13 @@
 import express from "express";
-import {reserveBook ,wishlistBook} from "../../../controllers/userControllers/booksControllers/booksContollers.js";
+import {
+  reserveBook,
+  wishlistBook,
+  recommendedBooks,
+} from "../../../controllers/userControllers/booksControllers/booksContollers.js";
 
-const router=express.Router();
+const router = express.Router();
 
+router.get("/recommendation", recommendedBooks);
 router.post('/reserve/isbn/:isbn/memberId/:memberId',reserveBook);
 router.post('/wishlist/isbn/:isbn/memberId/:memberId',wishlistBook);
-
-export default router; 
+export default router;
