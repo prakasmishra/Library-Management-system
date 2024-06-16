@@ -16,17 +16,29 @@ export const profileHome = async (req, res) => {
     res.send({ message: "Record Does not exists" }).status(500);
   }
 };
+
 export const getFavSub = async (req, res) => {
-  const memberId = req.params.id;
-  const query = ``;
-  const context = {};
-  const result = await driver.executeQuery(query, context);
+  try {
+    const memberId = req.params.id;
+    const query = `MATCH (m:Member {membership_id: $membership_id})-[r:FAVSUBJECT]->(s:Subject)
+  return s`;
+    const context = { membership_id: memberId };
+    const result = await driver.executeQuery(query, context);
+    const subjects = result.records.map(
+      (record) => record.get("s").properties.sub_name
+    );
+    console.log(subjects);
+    res.status(200).send(subjects);
+  } catch (error) {
+    res.status(500).send({ Error: error });
+  }
 };
+
 export const removeFavSub = async (req, res) => {
   try {
     const memberId = req.params.id;
     const { sub_name } = req.body;
-    //-------------------------------------------------------------------------------------------------------------
+    //---------------------------------Checking For Relation----------------------------------------------------------------------------
     const checkQuery = `
       MATCH (m:Member {membership_id: $membership_id})-[r:FAVSUBJECT]->(s:Subject {sub_name: $sub_name})
       RETURN count(r) AS relationshipCount;
@@ -38,7 +50,7 @@ export const removeFavSub = async (req, res) => {
     const checkResult = await driver.executeQuery(checkQuery, checkContext);
 
     const relationshipCount = checkResult.records[0].get("relationshipCount");
-    //------------------------------------------------------------------------------------------------------------------------
+    //-------------------------------If Exists then Deleting-----------------------------------------------------------------------------
     if (relationshipCount > 0) {
       const deleteQuery = `MATCH (m:Member {membership_id: $membership_id})-[r:FAVSUBJECT]->(s:Subject {sub_name: $sub_name})
   Delete r
@@ -53,6 +65,7 @@ export const removeFavSub = async (req, res) => {
     res.status(500).send({ Error: error });
   }
 };
+
 export const addFavSub = async (req, res) => {
   try {
     const memberId = req.params.id;
