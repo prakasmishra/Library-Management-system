@@ -12,6 +12,7 @@ import myBooksRoutes from "./routes/userRoutes/myBooks/myBooksRoutes.js";
 import booksRoutes from "./routes/userRoutes/books/booksRoutes.js";
 import profileRoutes from "./routes/userRoutes/profileRoutes/profile.js";
 import addDetailsRoutes from "./routes/userRoutes/authentication/auth.js";
+import { errorHandler, notFound } from "./middlewares/errorMiddleware.js";
 
 const app = express();
 
@@ -38,6 +39,10 @@ app.use("/api/admin",adminRoutes);
 
 // common for search books
 app.use("/api/common",commonRoutes);
+
+
+app.use(notFound);
+app.use(errorHandler);
 
 
 app.listen(PORT, () => {

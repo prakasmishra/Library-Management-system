@@ -2,7 +2,6 @@ import driver from "../../../utils/neo4j-driver.js"
 
 import asyncHandler from "express-async-handler"
 
-import { getBookDetails } from "./utils/getBookDetails.js";
 import parser from 'parse-neo4j';
 
 // for updating general info
@@ -29,10 +28,10 @@ export const editBook = asyncHandler(async(req,res) => {
     }
 
     // otherwise check if no of copies is updated or not
-    else if(resultArray[0].no_of_copies !== bookData.no_of_copies){
-        res.status(400).send({message : "Availability/# of copies cannot is unedittable in this path ."});
-        res.end();
-        return;
+    else if(bookData.no_of_copies){
+        res.status(400);
+        throw new Error("Availability/# of copies is not ediitable.");
+        
     }
     // different author , delete prev author rel create if any
     else if(resultArray[0].author_name !== bookData.author_name){
@@ -119,6 +118,8 @@ export const editBook = asyncHandler(async(req,res) => {
     )
     .catch((parseError) => {
       console.error(`Parsing error: ${parseError}`); 
+      res.status(500);
+      throw new Error("Data parsing error");
     });
 
     const responseArray = parser.parse(resultBookPromise);
