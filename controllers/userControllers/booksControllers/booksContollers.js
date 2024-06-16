@@ -4,7 +4,8 @@ export const reserveBook = async (req, res) => {
     try {
         const memberId = req.params.memberId;
         const isbn = req.params.isbn;
-        const result = await driver.executeQuery(`
+
+        const query = `
         MATCH (member:Member {membership_id: $member_id}), (book:Book {isbn: $isbn})
         MERGE (member)-[:TRANSACTION {
             lib_card_no: toInteger(-1),
@@ -14,13 +15,13 @@ export const reserveBook = async (req, res) => {
             due_date :"00-00-0000",
             return_date :"00-00-0000",
             fine : toInteger(0)
-        }]->(book) 
-        `, {
+        }]->(book)`;
+
+        const params = {
             member_id: memberId,
             isbn: isbn
-        }
-        )
-        // res.status(200).send(response);
+        };
+        const result = await driver.executeQuery(query, params );
         res.status(200).send({ message: "book reserved" });
     } catch (error) {
         console.error('Something went wrong:', error);
@@ -31,15 +32,16 @@ export const wishlistBook = async (req, res) => {
     try {
         const memberId = req.params.memberId;
         const isbn = req.params.isbn;
-        const result = await driver.executeQuery(`
+
+        const query = `
         MATCH (member:Member {membership_id: $member_id}), (book:Book {isbn: $isbn})
-        MERGE (member)-[:WISHLIST]->(book) 
-        `, {
+        MERGE (member)-[:WISHLIST]->(book)`;
+
+        const params =  {
             member_id: memberId,
             isbn: isbn
-        }
-        )
-        // res.status(200).send(response);
+        };
+        const result = await driver.executeQuery(query , params );
         res.status(200).send({ message: "wishlisted" });
     } catch (error) {
         console.error('Something went wrong:', error);
