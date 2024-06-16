@@ -23,10 +23,35 @@ export const getFavSub = async (req, res) => {
   const result = await driver.executeQuery(query, context);
 };
 export const removeFavSub = async (req, res) => {
-  const memberId = req.params.id;
-  const query = ``;
-  const context = {};
-  const result = await driver.executeQuery(query, context);
+  try {
+    const memberId = req.params.id;
+    const { sub_name } = req.body;
+    //-------------------------------------------------------------------------------------------------------------
+    const checkQuery = `
+      MATCH (m:Member {membership_id: $membership_id})-[r:FAVSUBJECT]->(s:Subject {sub_name: $sub_name})
+      RETURN count(r) AS relationshipCount;
+    `;
+    const checkContext = {
+      membership_id: memberId,
+      sub_name: sub_name,
+    };
+    const checkResult = await driver.executeQuery(checkQuery, checkContext);
+
+    const relationshipCount = checkResult.records[0].get("relationshipCount");
+    //------------------------------------------------------------------------------------------------------------------------
+    if (relationshipCount > 0) {
+      const deleteQuery = `MATCH (m:Member {membership_id: $membership_id})-[r:FAVSUBJECT]->(s:Subject {sub_name: $sub_name})
+  Delete r
+`;
+      const deleteContext = { membership_id: memberId, sub_name: sub_name };
+      const result = await driver.executeQuery(deleteQuery, deleteContext);
+      console.log("Success");
+      res.status(200).send({ message: "Entry Deleted Successfully" });
+    }
+    res.status(500).send({ message: "No Such Record Exists" });
+  } catch (error) {
+    res.status(500).send({ Error: error });
+  }
 };
 export const addFavSub = async (req, res) => {
   try {
