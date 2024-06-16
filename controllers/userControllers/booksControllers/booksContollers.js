@@ -1,5 +1,5 @@
 import driver from "../../../utils/neo4j-driver.js";
-
+const limit = 5;
 export const reserveBook = async (req, res) => {
   try {
     const memberId = req.params.memberId;
@@ -56,17 +56,21 @@ export const recommendedBooks = async (req, res) => {
       const context = {};
       const result = await driver.executeQuery(query, context);
       const books = result.records.map((record) => record.get("b").properties);
-      books.sort((a, b) => b.popularity.low - a.popularity.low);
-      res.status(200).send(books);
-      books.forEach((book) => console.log(book.title));
+      const popularBooks = books
+        .sort((a, b) => b.popularity.low - a.popularity.low)
+        .slice(0, limit);
+      popularBooks.forEach((book) => console.log(book.title));
+      res.status(200).send(popularBooks);
     } else {
       const query = `MATCH (s:Subject {sub_name : $subject})-[:CONTAINS]->(b : Book) RETURN b`;
       const context = { subject: subject };
       const result = await driver.executeQuery(query, context);
       const books = result.records.map((record) => record.get("b").properties);
-      books.sort((a, b) => b.popularity.low - a.popularity.low);
-      books.forEach((book) => console.log(book.title));
-      res.status(200).send(books);
+      const popularBooks = books
+        .sort((a, b) => b.popularity.low - a.popularity.low)
+        .slice(0, limit);
+      popularBooks.forEach((book) => console.log(book.title));
+      res.status(200).send(popularBooks);
     }
   } catch (error) {
     res.status(500).send({ Error: error });
