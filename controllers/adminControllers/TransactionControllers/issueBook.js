@@ -14,9 +14,12 @@ export const issueBook = asyncHandler(async(req,res) => {
         res.status(400).send("Incomplete data");
     }
 
-    const due_time_in_day = 15;
+    const due_time_in_day = process.env.DUE_DAY_COUNT;
     const due_date = addDaysToDate(transactionData.issue_date,due_time_in_day);
     transactionData.due_date = due_date;
+
+    // add renewal count
+    transactionData.renewal_count = process.env.MAX_RENEWAL_COUNT;
 
     console.log("Isssue data ",transactionData);
 
@@ -28,8 +31,8 @@ export const issueBook = asyncHandler(async(req,res) => {
     ));
 
     if(!bookExists){
-        res.status(400).send("Book does not exist.");
-        return;
+        res.status(400);
+        throw new Error("Book does not exist.");
     }
 
     // check for isbn
@@ -39,8 +42,8 @@ export const issueBook = asyncHandler(async(req,res) => {
     ));
 
     if(!memberExists){
-        res.status(400).send("member does not exist.");
-        return;
+        res.status(400);
+        throw new Error("member does not exist.");
     }
 
     //  check if already issued or not
@@ -54,8 +57,8 @@ export const issueBook = asyncHandler(async(req,res) => {
     const parsedResult1 = parser.parse(result1);
 
     if(parsedResult1.length !== 0){
-        res.status(400).send("Book already issued");
-        return;
+        res.status(400);
+        throw new Error("Book already issued");
     }
     // find booked tx , update status and dates
 
@@ -68,7 +71,7 @@ export const issueBook = asyncHandler(async(req,res) => {
         t.due_date = $due_date,
         t.copy_no = $copy_no,
         t.lib_card_no = $lib_card_no,
-        t.fine = $fine
+        t.renewal_count = $renewal_count
         RETURN t
     `;
     
@@ -91,7 +94,7 @@ export const issueBook = asyncHandler(async(req,res) => {
             due_date : $due_date,
             copy_no : $copy_no,
             lib_card_no : $lib_card_no,
-            fine : $fine
+            renewal_count : $renewal_count
          }]->(b)
         RETURN t
         `;
@@ -100,11 +103,11 @@ export const issueBook = asyncHandler(async(req,res) => {
         const parsedResult3 = parser.parse(result3);
         
         if(parsedResult3.length === 0){
-            res.status(400).send("Failed to create new issue tx");
-            return;
+            res.status(500);
+            throw new Error("Failed to create new issue tx");
         }
 
-        res.status(200).send("Book issued successfully(Not booked,directly issued)");
+        res.status(200).send({message : "Book issued successfully(Not booked,directly issued)"});
     }    
-    res.send("Book issued successfully(formely booked,not issued)");
+    res.send({message : "Book issued successfully(formaly booked,not issued)"});
 })
