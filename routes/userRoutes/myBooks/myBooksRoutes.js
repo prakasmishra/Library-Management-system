@@ -3,8 +3,8 @@ import {borrowingHistory,currentlyBorrowedBooks,wishlistedBooks} from "../../../
 
 const router=express.Router();
 
-router.get('/current_books/:memberId',currentlyBorrowedBooks);
-router.get('/history/:memberId',borrowingHistory); //range (query parameter)
-router.get('/wishlist/:memberId',wishlistedBooks);
+router.get('/current_books/memberId/:memberId',currentlyBorrowedBooks);
+router.get('/history/memberId/:memberId',borrowingHistory); //range (query parameter)
+router.get('/wishlist/memberId/:memberId',wishlistedBooks);
 
 export default router; 

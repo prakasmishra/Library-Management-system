@@ -18,7 +18,12 @@ export const currentlyBorrowedBooks = async (req, res) => {
         }
         const result = await driver.executeQuery(query, params);
         const response = parser.parse(result);
-        res.status(200).send(response);
+        if(response.length === 0){
+            res.status(200).send({ message: "you don't have any borrowed book" });
+        }
+        else{
+            res.status(200).send(response);
+        }
     } catch (error) {
         console.error('Something went wrong:', error);
     }
@@ -37,7 +42,12 @@ export const wishlistedBooks = async (req, res) => {
         const params = { member_id: memberId }
         const result = await driver.executeQuery(query, params);
         const response = parser.parse(result);
-        res.status(200).send(response);
+        if(response.length===0){
+            res.status(200).send({ message: "no books  added to wishlist yet" });
+        }
+        else{
+            res.status(200).send(response);
+        }
     } catch (error) {
         console.error('Something went wrong:', error);
     }
@@ -75,7 +85,12 @@ export const borrowingHistory = async (req, res) => {
         }
         const result = await driver.executeQuery(query, params);
         const response = parser.parse(result);
-        res.status(200).send(response);
+        if(response.length===0){
+            res.status(200).send({ message: "History is empty" });
+        }
+        else{
+            res.status(200).send(response);
+        }
     } catch (error) {
         console.error('Something went wrong:', error);
     }
