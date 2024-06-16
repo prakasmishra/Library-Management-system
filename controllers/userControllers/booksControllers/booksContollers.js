@@ -37,7 +37,7 @@ export const reserveBook = async (req, res) => {
             };
             const result = await driver.executeQuery(query, params);
             res.status(200).send({ message: "book reserved" });
-            console.log("hello");
+            // console.log("hello");
         }
         else {
             res.status(200).send({ message: "book already issued or booked" });
@@ -51,17 +51,28 @@ export const wishlistBook = async (req, res) => {
     try {
         const memberId = req.params.memberId;
         const isbn = req.params.isbn;
-
-        const query = `
-        MATCH (member:Member {membership_id: $member_id}), (book:Book {isbn: $isbn})
-        MERGE (member)-[:WISHLIST]->(book)`;
-
+        const helperQuery=`
+        MATCH (m:Member{membership_id: $member_id}) 
+        -[:WISHLIST]-> (book:Book {isbn: $isbn})
+        RETURN m.membership_id AS id`;
+        
         const params = {
             member_id: memberId,
             isbn: isbn
         };
-        const result = await driver.executeQuery(query, params);
-        res.status(200).send({ message: "wishlisted" });
+        const helperResult = await driver.executeQuery(helperQuery, params);
+        const response = parser.parse(helperResult);
+        if(response.length===0){
+            const query = `
+            MATCH (member:Member {membership_id: $member_id}), (book:Book {isbn: $isbn})
+            MERGE (member)-[:WISHLIST]->(book)`;
+        
+            const result = await driver.executeQuery(query, params);
+            res.status(200).send({ message: "wishlisted" });
+        }
+        else{
+            res.status(200).send({ message: "Already in your wishlist" });
+        }
     } catch (error) {
         console.error('Something went wrong:', error);
     }

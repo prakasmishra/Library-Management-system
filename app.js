@@ -24,7 +24,7 @@ app.use(express.json());
 app.use("/api/developer", checkRoutes);
 
 app.use("/api/user/myBooks", myBooksRoutes);
-app.use("/api/user/book/browse", booksRoutes);
+app.use("/api/user/books", booksRoutes);
 app.use("/api/user/profile", profileRoutes);
 app.use("/api/user/auth", addDetailsRoutes);
 //user/book/browse
