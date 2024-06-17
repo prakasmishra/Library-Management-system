@@ -1,15 +1,5 @@
-/*import driver from "../../../utils/neo4j-driver.js"
 
-import asyncHandler from "express-async-handler"
-import parser from 'parse-neo4j'
-
-export const renewBook = asyncHandler(async(req,res) => {
-    res.send("TODO :Book renewed successfully");
-})
-*/
-//to do made
-
-import driver from "../../../utils/neo4j-driver.js"
+import driver, { convertToNeo4jInteger } from "../../../utils/neo4j-driver.js"
 import asyncHandler from "express-async-handler"
 import { addDaysToDate } from "./utils/addDate.js";
 import parser from 'parse-neo4j';
@@ -19,17 +9,20 @@ import parser from 'parse-neo4j';
 export const renewBook = asyncHandler(async (req, res) => {
     const transactionData = req.body;
 
+    
+
     // calculate due_date
-    console.log(transactionData.renewal_count);
+    console.log(transactionData.issue_date);
     if(transactionData.issue_date=== undefined){
-        res.status(400).send("Renewal cout object not found");
+        res.status(400).send("Due date error");
     }
+
+    
 
     const due_time_in_days = process.env.DUE_DAY_COUNT;
     const due_date = addDaysToDate(transactionData.issue_date,due_time_in_days);
     transactionData.due_date = due_date;
-    
-
+   
 
     //check if the transaction exists and if the book is issued to the member
     //  check if already issued or not
@@ -48,7 +41,10 @@ export const renewBook = asyncHandler(async (req, res) => {
     }
 
     const transaction = parsedResult1[0];
-    const renewal_count = transaction.properties.renewal_count.low; 
+console.log(transaction);
+
+    const renewal_count = transaction.renewal_count; 
+    transactionData.renewal_count=convertToNeo4jInteger(renewal_count);
 
     if (renewal_count <= 0) {
         res.status(400).send({ message: "Renewal count is 0. Cannot renew this book." });
@@ -74,5 +70,5 @@ const result2 = await driver.executeQuery(query2,transactionData);
 const parsedResult2 = parser.parse(result2);
 
 console.log("Book is renewed",parsedResult2);
-    res.status(200).send({ message: "Book renewed successfully.", new_due_date });
+    res.status(200).send({ message: "Book renewed successfully.", due_date });
 });
