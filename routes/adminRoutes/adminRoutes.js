@@ -15,6 +15,7 @@ import { issueBook } from '../../controllers/adminControllers/TransactionControl
 import { returnBook } from '../../controllers/adminControllers/TransactionControllers/returnBook.js';
 import { renewBook } from '../../controllers/adminControllers/TransactionControllers/renewBook.js';
 import { getHistory } from '../../controllers/adminControllers/TransactionControllers/transactionHistory.js';
+import { issuedToday } from '../../controllers/adminControllers/StatisticsControllers/issuedToday.js';
 
 
 const router = express.Router();
@@ -40,6 +41,7 @@ router.get('/transaction/history',getHistory);
 
 router.get('/stats/total-books',totalBooks);
 router.get('/stats/total-members',totalMembers);
+router.get('stats/issued-today', issuedToday);
 
 // notice routes
 
