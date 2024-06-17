@@ -22,7 +22,7 @@ export const renewBook = asyncHandler(async (req, res) => {
     // calculate due_date
     console.log(transactionData.renewal_count);
     if(transactionData.issue_date=== undefined){
-        res.status(400).send("Renewal cout object not found");
+        res.status(400).send("Renewal count object not found");
     }
 
     const due_time_in_days = process.env.DUE_DAY_COUNT;
