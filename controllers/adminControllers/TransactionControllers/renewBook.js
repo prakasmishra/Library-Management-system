@@ -17,26 +17,34 @@ import parser from 'parse-neo4j';
 
 
 export const renewBook = asyncHandler(async (req, res) => {
-    const { membership_id, isbn, renewal_date } = req.body;
+    const transactionData = req.body;
 
-    //check if the transaction exists and if the book is issued to the member
-    const query1 = `
-        MATCH (m:Member {membership_id: $membership_id})-
-        [t:TRANSACTION {status: 'issued'}]->(b:Book {isbn: $isbn})
-        RETURN t
-    `;
-    const result1 = await driver.executeQuery(query1, { membership_id, isbn });
-    const parsedResult1 = parser.parse(result1);
-
-    if (parsedResult1.length === 0 || !parsedResult1[0].properties.renewal_count) {
-        res.status(400).send({ message: "Cannot retrieve renewal count for this transaction." });
-        return;
+    // calculate due_date
+    console.log(transactionData.renewal_count);
+    if(transactionData.issue_date=== undefined){
+        res.status(400).send("Renewal cout object not found");
     }
+
+    const due_time_in_days = process.env.DUE_DAY_COUNT;
+    const due_date = addDaysToDate(transactionData.issue_date,due_time_in_days);
+    transactionData.due_date = due_date;
     
 
-    if (parsedResult1.length === 0) {
-        res.status(400).send({ message: "No issued transaction found for this book and member." });
-        return;
+
+    //check if the transaction exists and if the book is issued to the member
+    //  check if already issued or not
+    const query1 = `
+        MATCH (:Member {membership_id : $membership_id})-
+        [t:TRANSACTION {status : 'issued'}]->
+        (:Book {isbn : $isbn})
+        RETURN t
+    `;
+    const result1 = await driver.executeQuery(query1,transactionData);
+    const parsedResult1 = parser.parse(result1);
+
+    if(parsedResult1.length === 0){
+        res.status(400);
+        throw new Error("Book not issued yet");
     }
 
     const transaction = parsedResult1[0];
@@ -46,30 +54,25 @@ export const renewBook = asyncHandler(async (req, res) => {
         res.status(400).send({ message: "Renewal count is 0. Cannot renew this book." });
         return;
     }
+//t.renewal_count = t.renewal_count - 1
 
-    //calculating new due date
-    const due_time_in_day = process.env.DUE_DAY_COUNT;
-    const new_due_date = addDaysToDate(renewal_date, due_time_in_day);
 
-    //update transaction to extend due date & decrement renewal count
-    const query2 = `
-        MATCH (m:Member {membership_id: $membership_id})-
-        [t:TRANSACTION {status: 'issued'}]->(b:Book {isbn: $isbn})
-        SET t.due_date = $new_due_date,
-            t.renewal_count = t.renewal_count - 1
-        RETURN t
-    `;
-    const result2 = await driver.executeQuery(query2, {
-        membership_id,
-        isbn,
-        new_due_date
-    });
-    const parsedResult2 = parser.parse(result2);
+const query2 = `
+MATCH (:Member {membership_id : $membership_id})-
+[t:TRANSACTION {status : 'issued'}]->
+(:Book {isbn : $isbn})
+SET t.status = 'issued',
+t.issue_date = $issue_date,
+t.due_date = $due_date,
+t.copy_no = $copy_no,
+t.lib_card_no = $lib_card_no,
+t.renewal_count = $renewal_count-1
+RETURN t
+`;
 
-    if (parsedResult2.length === 0) {
-        res.status(500).send({ message: "Failed to renew the book." });
-        return;
-    }
+const result2 = await driver.executeQuery(query2,transactionData);
+const parsedResult2 = parser.parse(result2);
 
+console.log("Book is renewed",parsedResult2);
     res.status(200).send({ message: "Book renewed successfully.", new_due_date });
 });
