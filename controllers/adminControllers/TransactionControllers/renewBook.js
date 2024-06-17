@@ -14,6 +14,8 @@ import asyncHandler from "express-async-handler"
 import { addDaysToDate } from "./utils/addDate.js";
 import parser from 'parse-neo4j';
 
+
+
 export const renewBook = asyncHandler(async (req, res) => {
     const { membership_id, isbn, renewal_date } = req.body;
 
@@ -25,6 +27,12 @@ export const renewBook = asyncHandler(async (req, res) => {
     `;
     const result1 = await driver.executeQuery(query1, { membership_id, isbn });
     const parsedResult1 = parser.parse(result1);
+
+    if (parsedResult1.length === 0 || !parsedResult1[0].properties.renewal_count) {
+        res.status(400).send({ message: "Cannot retrieve renewal count for this transaction." });
+        return;
+    }
+    
 
     if (parsedResult1.length === 0) {
         res.status(400).send({ message: "No issued transaction found for this book and member." });
