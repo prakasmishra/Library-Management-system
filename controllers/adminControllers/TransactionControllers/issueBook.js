@@ -1,4 +1,4 @@
-import driver from "../../../utils/neo4j-driver.js"
+import driver, { convertToNeo4jInteger } from "../../../utils/neo4j-driver.js"
 
 import asyncHandler from "express-async-handler"
 import { addDaysToDate } from "./utils/addDate.js";
@@ -19,7 +19,7 @@ export const issueBook = asyncHandler(async(req,res) => {
     transactionData.due_date = due_date;
 
     // add renewal count
-    transactionData.renewal_count = process.env.MAX_RENEWAL_COUNT;
+    transactionData.renewal_count = convertToNeo4jInteger(process.env.MAX_RENEWAL_COUNT);
 
     console.log("Isssue data ",transactionData);
 
@@ -34,8 +34,12 @@ export const issueBook = asyncHandler(async(req,res) => {
         res.status(400);
         throw new Error("Book does not exist.");
     }
+    else if(bookExists[0].no_of_copies <= 0){
+        res.status(400);
+        throw new Error("Cannot issue book, not available.");
+    }
 
-    // check for isbn
+    // check for member
     const memberExists = parser.parse( await driver.executeQuery(
         `MATCH (m:Member {membership_id : $membership_id}) RETURN m`,
         {membership_id : transactionData.membership_id}
@@ -61,17 +65,19 @@ export const issueBook = asyncHandler(async(req,res) => {
         throw new Error("Book already issued");
     }
     // find booked tx , update status and dates
+    // also update book avaialbility
 
     const query2 = `
         MATCH (:Member {membership_id : $membership_id})-
         [t:TRANSACTION {status : 'booked'}]->
-        (:Book {isbn : $isbn})
+        (b:Book {isbn : $isbn})
         SET t.status = 'issued',
         t.issue_date = $issue_date,
         t.due_date = $due_date,
         t.copy_no = $copy_no,
         t.lib_card_no = $lib_card_no,
-        t.renewal_count = $renewal_count
+        t.renewal_count = $renewal_count,
+        b.no_of_copies = b.no_of_copies-1
         RETURN t
     `;
     
@@ -96,6 +102,8 @@ export const issueBook = asyncHandler(async(req,res) => {
             lib_card_no : $lib_card_no,
             renewal_count : $renewal_count
          }]->(b)
+        WITH b,t
+        SET b.no_of_copies = b.no_of_copies-1
         RETURN t
         `;
 

@@ -18,10 +18,11 @@ export const returnBook = asyncHandler(async(req,res) => {
     const query = `
         MATCH (:Member {membership_id : $membership_id})-
         [t:TRANSACTION {status : 'issued'}]->
-        (:Book {isbn : $isbn})
+        (b:Book {isbn : $isbn})
         SET t.status = 'returned',
         t.return_date = $return_date,
-        t.fine = $fine
+        t.fine = $fine,
+        b.no_of_copies = b.no_of_copies + 1
         RETURN t
     `;
 

@@ -7,10 +7,7 @@ import { convertToNeo4jInteger } from "../../../utils/neo4j-driver.js";
 
 export const updateBookAvailability = asyncHandler(async(req,res)=>{
 
-    const updateCount = req.query['updated-count'];
-    console.log(updateCount);
-
-    const {isbn} = req.body;
+    const {isbn,updatedCount } = req.body;
 
     const query = `
         MATCH (b:Book {isbn: $isbn})
@@ -18,7 +15,7 @@ export const updateBookAvailability = asyncHandler(async(req,res)=>{
         RETURN b
     `;
 
-    const result = await driver.executeQuery(query,{isbn : isbn,availability : convertToNeo4jInteger(updateCount)});
+    const result = await driver.executeQuery(query,{isbn : isbn,availability : convertToNeo4jInteger(updatedCount)});
     const responseArray = parser.parse(result);
 
     if(responseArray.length === 0){

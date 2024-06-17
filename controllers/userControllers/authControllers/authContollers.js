@@ -41,8 +41,8 @@ export const addUserDetails = async (req, res) => {
       join_date: join_date,
     };
     const result = await driver.executeQuery(query, context);
-    console.log(result);
-    res.send(result).status(200);
+    console.log(result.records[0].get("m").properties);
+    res.send({ message: "Details added Successfully" }).status(200);
   } catch (error) {
     res.send({ Error: error }).status(500);
   }

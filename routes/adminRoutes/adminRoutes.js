@@ -10,12 +10,21 @@ import { totalBooks } from '../../controllers/adminControllers/StatisticsControl
 import { totalMembers } from '../../controllers/adminControllers/StatisticsControllers/totalMembers.js';
 import { issueNotice } from '../../controllers/adminControllers/NoticeControllers/issueNotice.js';
 import { obsoleteNotice } from '../../controllers/adminControllers/NoticeControllers/obsoleteNotice.js';
-import { libraryInfo } from '../../controllers/adminControllers/LibraryInfoControllers/libraryInfo.js';
 import { issueBook } from '../../controllers/adminControllers/TransactionControllers/issueBook.js';
 import { returnBook } from '../../controllers/adminControllers/TransactionControllers/returnBook.js';
 import { renewBook } from '../../controllers/adminControllers/TransactionControllers/renewBook.js';
 import { getHistory } from '../../controllers/adminControllers/TransactionControllers/transactionHistory.js';
+
 import { issuedToday } from '../../controllers/adminControllers/StatisticsControllers/issuedToday.js';
+
+import { getAllActiveNotice } from '../../controllers/adminControllers/NoticeControllers/getAllActiveNotice.js';
+import { setlibraryInfo } from '../../controllers/adminControllers/LibraryInfoControllers/setLibraryInfo.js';
+import { getlibraryInfo } from '../../controllers/adminControllers/LibraryInfoControllers/getlibraryInfo.js';
+import { issuedToday } from '../../controllers/adminControllers/StatisticsControllers/issuedToday.js';
+import { returnedToday } from '../../controllers/adminControllers/StatisticsControllers/returnedToday.js';
+import { borrowedThisMonth } from '../../controllers/adminControllers/StatisticsControllers/borrowedThisMonth.js';
+import { totalOverdue } from '../../controllers/adminControllers/StatisticsControllers/totalOverdue.js';
+
 
 
 const router = express.Router();
@@ -41,15 +50,24 @@ router.get('/transaction/history',getHistory);
 
 router.get('/stats/total-books',totalBooks);
 router.get('/stats/total-members',totalMembers);
-router.get('stats/issued-today', issuedToday);
+
+router.get('/stats/total-issued-today',issuedToday);
+router.get('/stats/total-returned-today',returnedToday);
+router.get('/stats/total-borrowed-this-month',borrowedThisMonth);
+router.get('/stats/total-overdue',totalOverdue);
+
+
+>
 
 // notice routes
 
 router.put('/notice/issue',issueNotice);
-router.put('/notice/mark-obsolete',obsoleteNotice);
+router.get('/notice/get-all-active',getAllActiveNotice);
+router.delete('/notice/mark-obsolete/noticeid/:id',obsoleteNotice);
 
 // library info routes
 
-router.put('/settings',libraryInfo);
+router.put('/set-settings',setlibraryInfo);
+router.get('/get-settings',getlibraryInfo);
 
 export default router;
