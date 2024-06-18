@@ -15,7 +15,7 @@ import { returnBook } from '../../controllers/adminControllers/TransactionContro
 import { renewBook } from '../../controllers/adminControllers/TransactionControllers/renewBook.js';
 import { getHistory } from '../../controllers/adminControllers/TransactionControllers/transactionHistory.js';
 
-import { issuedToday } from '../../controllers/adminControllers/StatisticsControllers/issuedToday.js';
+// import { issuedToday } from '../../controllers/adminControllers/StatisticsControllers/issuedToday.js';
 
 import { getAllActiveNotice } from '../../controllers/adminControllers/NoticeControllers/getAllActiveNotice.js';
 import { setlibraryInfo } from '../../controllers/adminControllers/LibraryInfoControllers/setLibraryInfo.js';
@@ -56,8 +56,6 @@ router.get('/stats/total-returned-today',returnedToday);
 router.get('/stats/total-borrowed-this-month',borrowedThisMonth);
 router.get('/stats/total-overdue',totalOverdue);
 
-
->
 
 // notice routes
 
