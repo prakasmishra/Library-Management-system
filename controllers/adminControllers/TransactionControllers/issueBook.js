@@ -10,7 +10,7 @@ export const issueBook = asyncHandler(async(req,res) => {
     
     // calculate due_date
     console.log(transactionData.issue_date);
-    if(transactionData.issue_date=== undefined){
+    if(transactionData.issue_date === undefined){
         res.status(400).send("Incomplete data");
     }
 
