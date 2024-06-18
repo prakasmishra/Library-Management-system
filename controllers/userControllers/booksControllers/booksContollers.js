@@ -4,7 +4,7 @@ import parser from "parse-neo4j";
 export const reserveBook = async (req, res) => {
   try {
     const memberId = req.params.memberId;
-    const isbn = req.params.isbn; 
+    const isbn = req.params.isbn;
     const helperQuery = `
         MATCH (member:Member {membership_id: $member_id})
         -[r:TRANSACTION]->(book:Book {isbn: $isbn})
@@ -80,7 +80,8 @@ export const recommendedBooks = async (req, res) => {
       const query = `match (b : Book) return b`;
       const context = {};
       const result = await driver.executeQuery(query, context);
-      const books = result.records.map((record) => record.get("b").properties);
+      //   const books = result.records.map((record) => record.get("b").properties);
+      const books = parser.parse(result);
       const popularBooks = books
         .sort((a, b) => b.popularity.low - a.popularity.low)
         .slice(0, limit);
@@ -90,7 +91,7 @@ export const recommendedBooks = async (req, res) => {
       const query = `MATCH (s:Subject {sub_name : $subject})-[:CONTAINS]->(b : Book) RETURN b`;
       const context = { subject: subject };
       const result = await driver.executeQuery(query, context);
-      const books = result.records.map((record) => record.get("b").properties);
+      const books = parser.parse(result);
       const popularBooks = books
         .sort((a, b) => b.popularity.low - a.popularity.low)
         .slice(0, limit);
