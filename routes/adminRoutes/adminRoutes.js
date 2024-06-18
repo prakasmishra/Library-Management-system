@@ -14,6 +14,9 @@ import { issueBook } from '../../controllers/adminControllers/TransactionControl
 import { returnBook } from '../../controllers/adminControllers/TransactionControllers/returnBook.js';
 import { renewBook } from '../../controllers/adminControllers/TransactionControllers/renewBook.js';
 import { getHistory } from '../../controllers/adminControllers/TransactionControllers/transactionHistory.js';
+
+import { issuedToday } from '../../controllers/adminControllers/StatisticsControllers/issuedToday.js';
+
 import { getAllActiveNotice } from '../../controllers/adminControllers/NoticeControllers/getAllActiveNotice.js';
 import { setlibraryInfo } from '../../controllers/adminControllers/LibraryInfoControllers/setLibraryInfo.js';
 import { getlibraryInfo } from '../../controllers/adminControllers/LibraryInfoControllers/getlibraryInfo.js';
@@ -21,6 +24,7 @@ import { issuedToday } from '../../controllers/adminControllers/StatisticsContro
 import { returnedToday } from '../../controllers/adminControllers/StatisticsControllers/returnedToday.js';
 import { borrowedThisMonth } from '../../controllers/adminControllers/StatisticsControllers/borrowedThisMonth.js';
 import { totalOverdue } from '../../controllers/adminControllers/StatisticsControllers/totalOverdue.js';
+
 
 
 const router = express.Router();
@@ -46,12 +50,14 @@ router.get('/transaction/history',getHistory);
 
 router.get('/stats/total-books',totalBooks);
 router.get('/stats/total-members',totalMembers);
+
 router.get('/stats/total-issued-today',issuedToday);
 router.get('/stats/total-returned-today',returnedToday);
 router.get('/stats/total-borrowed-this-month',borrowedThisMonth);
 router.get('/stats/total-overdue',totalOverdue);
 
 
+>
 
 // notice routes
 

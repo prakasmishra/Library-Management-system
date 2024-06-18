@@ -5,7 +5,7 @@ import parser from "parse-neo4j";
 export const currentlyBorrowedBooks = async (req, res) => {
     try {
         const memberId = req.params.memberId;
-
+    
         const query = `
         MATCH (m:Member {membership_id: $member_id})
         -[:TRANSACTION {status: 'issued'}]->(b : Book)
