@@ -1,5 +1,6 @@
 import express from "express";
 import connectToDB from "./db/connectToDB.js";
+import cors from "cors";
 
 import checkRoutes from "./routes/checkRoutes.js";
 
@@ -13,6 +14,7 @@ import addDetailsRoutes from "./routes/userRoutes/authentication/auth.js";
 import { errorHandler, notFound } from "./middlewares/errorMiddleware.js";
 
 const app = express();
+app.use(cors());
 
 const PORT = process.env.PORT;
 
