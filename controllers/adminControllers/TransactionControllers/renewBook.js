@@ -21,7 +21,7 @@ export const renewBook = asyncHandler(async (req, res) => {
 
     
 
-    const due_time_in_days = process.env.DUE_DAY_COUNT;
+    const due_time_in_days = process.env.RENEWAL_EXTENDED_DAY_COUNT;
     const due_date = addDaysToDate(transactionData.issue_date,due_time_in_days);
     transactionData.due_date = due_date;
    
@@ -43,7 +43,7 @@ export const renewBook = asyncHandler(async (req, res) => {
     }
 
     const transaction = parsedResult1[0];
-console.log(transaction);
+    console.log(transaction);
 
     const renewal_count = transaction.renewal_count; 
     transactionData.renewal_count=convertToNeo4jInteger(renewal_count);
