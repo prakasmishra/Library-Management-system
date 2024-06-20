@@ -13,6 +13,7 @@ import profileRoutes from "./routes/userRoutes/profileRoutes/profile.js";
 import addDetailsRoutes from "./routes/userRoutes/authentication/auth.js";
 import { errorHandler, notFound } from "./middlewares/errorMiddleware.js";
 
+
 const app = express();
 app.use(cors());
 
