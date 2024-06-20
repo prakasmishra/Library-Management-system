@@ -5,6 +5,9 @@ import parser from "parse-neo4j";
 export const getHistory = async (req, res) => {
     try {
         const { memberId, isbn, status } = req.query;
+        console.log(memberId);
+        console.log(isbn);
+        console.log(status);
         let query;
         if(!memberId && !isbn && !status){
             // console.log("000");

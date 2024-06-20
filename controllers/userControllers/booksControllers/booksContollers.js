@@ -5,6 +5,10 @@ export const reserveBook = async (req, res) => {
   try {
     const memberId = req.params.memberId;
     const isbn = req.params.isbn; 
+
+    console.log(memberId);
+    console.log(isbn);
+
     const helperQuery = `
         MATCH (member:Member {membership_id: $member_id})
         -[r:TRANSACTION]->(book:Book {isbn: $isbn})
