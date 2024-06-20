@@ -3,36 +3,36 @@ import driver from "../../../utils/neo4j-driver.js";
 import parser from "parse-neo4j";
 
 export const profileHome = async (req, res) => {
-  const id = req.params.id;
-  console.log(id);
-  try {
-    const context = {
-      id: id,
-    };
-    const memberQuery = `MATCH (m:Member {membership_id : $id}) return m`;
-    const deptQuery = `MATCH (m:Member{membership_id : $id})-[:ENROLLED_IN] ->(d:Department) RETURN d`;
-    const res1 = await driver.executeQuery(memberQuery, context);
-    const res2 = await driver.executeQuery(deptQuery, context);
-    const res3 = await axios.get(
-      `https://library-management-system-f9gh.onrender.com/api/user/profile/get/fav-sub/${id}`
-    );
-    const memberDetails = parser.parse(res1);
-    const deptDetails = parser.parse(res2);
-    // console.log(memberDetails[0]);
-    // console.log(deptDetails[0]);
-    // console.log(res3.data);
-    const profile = {
-      member: memberDetails[0],
-      department: deptDetails[0],
-      favSub: res3.data,
-    };
-    console.log("Success");
-    // member_details = result.records.at(0)._fields.at(0).properties;
-    res.send(profile).status(200);
-  } catch (error) {
-    console.log("Error at extracting data");
-    res.send({ message: error }).status(500);
-  }
+  // const id = req.params.id;
+  // console.log(id);
+  // try {
+  //   const context = {
+  //     id: id,
+  //   };
+  //   const memberQuery = `MATCH (m:Member {membership_id : $id}) return m`;
+  //   const deptQuery = `MATCH (m:Member{membership_id : $id})-[:ENROLLED_IN] ->(d:Department) RETURN d`;
+  //   const res1 = await driver.executeQuery(memberQuery, context);
+  //   const res2 = await driver.executeQuery(deptQuery, context);
+  //   const res3 = await axios.get(
+  //     `https://library-management-system-f9gh.onrender.com/api/user/profile/get/fav-sub/${id}`
+  //   );
+  //   const memberDetails = parser.parse(res1);
+  //   const deptDetails = parser.parse(res2);
+  //   // console.log(memberDetails[0]);
+  //   // console.log(deptDetails[0]);
+  //   // console.log(res3.data);
+  //   const profile = {
+  //     member: memberDetails[0],
+  //     department: deptDetails[0],
+  //     favSub: res3.data,
+  //   };
+  //   console.log("Success");
+  //   // member_details = result.records.at(0)._fields.at(0).properties;
+  //   res.send(profile).status(200);
+  // } catch (error) {
+  //   console.log("Error at extracting data");
+  //   res.send({ message: error }).status(500);
+  // }
 };
 
 export const getFavSub = async (req, res) => {
