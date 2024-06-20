@@ -83,7 +83,7 @@ export const recommendedBooks = async (req, res) => {
       //   const books = result.records.map((record) => record.get("b").properties);
       const books = parser.parse(result);
       const popularBooks = books
-        .sort((a, b) => b.popularity.low - a.popularity.low)
+        .sort((a, b) => b.popularity - a.popularity)
         .slice(0, limit);
       popularBooks.forEach((book) => console.log(book.title));
       res.status(200).send(popularBooks);
@@ -93,11 +93,31 @@ export const recommendedBooks = async (req, res) => {
       const result = await driver.executeQuery(query, context);
       const books = parser.parse(result);
       const popularBooks = books
-        .sort((a, b) => b.popularity.low - a.popularity.low)
+        .sort((a, b) => b.popularity - a.popularity)
         .slice(0, limit);
       popularBooks.forEach((book) => console.log(book.title));
       res.status(200).send(popularBooks);
     }
+  } catch (error) {
+    res.status(500).send({ Error: error });
+  }
+};
+
+
+export const relatedBooks = async (req, res) => {
+  try {
+    const isbn = req.params.isbn;
+    // console.log(isbn);
+    const query = `MATCH (: Book {isbn : $isbn})<-[:CONTAINS]-(s:Subject)-[:CONTAINS]->(b: Book)
+    RETURN b`;
+    const context = { isbn: isbn };
+    const result = await driver.executeQuery(query, context);
+    const books = parser.parse(result);
+    const popularBooks = books
+      .sort((a, b) => b.popularity - a.popularity)
+      .slice(0, limit);
+      popularBooks.forEach((book) => console.log(book.title));
+      res.status(200).send(popularBooks);
   } catch (error) {
     res.status(500).send({ Error: error });
   }
