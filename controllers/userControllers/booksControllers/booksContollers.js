@@ -1,4 +1,6 @@
 import driver from "../../../utils/neo4j-driver.js";
+import { sendNotificationEmail } from "../../adminControllers/NotificationControllers/notificationController.js";
+
 const limit = 5;
 import parser from "parse-neo4j";
 export const reserveBook = async (req, res) => {
@@ -34,6 +36,10 @@ export const reserveBook = async (req, res) => {
         isbn: isbn,
       };
       const result = await driver.executeQuery(query, params);
+
+      //sending notification emails to admins
+      await sendNotificationEmail(req, res);
+
       res.status(200).send({ message: "book reserved" });
       // console.log("hello");
     } else {

@@ -1,44 +1,8 @@
-/*import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
-import asyncHandler from "express-async-handler"
-import { error } from 'neo4j-driver';
 
-dotenv.config();
-
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
-
-export const sendNotificationEmail = async (req, res) => {
-   const {to, subject, text } = req.body
-    const mailOptions = {
-    
-    from: process.env.EMAIL_USER,
-    to,
-    subject,
-    text,
-  };
-
-
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log('Email sent');
-    res.send(" Email has been sent");
-    
-  } catch (error) {
-    console.error('Error sending email:', error);
-    res.send("Could'nt send.");
-  }
-};
-*/
 
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
-import asyncHandler from "express-async-handler"
+import asyncHandler from "express-async-handler";
 import driver from "../../../utils/neo4j-driver.js";
 import parser from "parse-neo4j";
 
@@ -53,40 +17,40 @@ const transporter = nodemailer.createTransport({
 });
 
 function replaceDomain(email) {
-    //as first emails were imported using emample.com but later changed. so this is not called
-    return email.replace("@example.com", "@gmail.com");
+  return email.replace("@example.com", "@gmail.com");
 }
 
 export const sendNotificationEmail = async (req, res) => {
   try {
-    //cypher query to get all amail adresses
+    //cypher query to get all email addresses
     const query = `
       MATCH (admin:Admin)
       RETURN admin.email AS email
     `;
-    const result = await driver.executeQuery(query);
 
-    //log the query result
-    console.log("Query Result:", result);
+    const session = driver.session();
+    const result = await session.run(query);
+    await session.close();
+
+    //log raw query result
+    console.log("Raw Query Result:", result);
 
     const admins = parser.parse(result);
 
-    //log retrieved email address for debugging
-    console.log("Admin Emails:", admins.map(admin => admin.email));
+    //log parsed result
+    console.log("Parsed Admins:", admins);
 
-    //sending notif to each admin
-    const promises = admins.map(async (admin) => {
+    //sending notification to each admin
+    const promises = admins.map(async (email) => {
+      // Checking if email is undefined, happens if in neo4j separate property not defined as email
+      if (!email) {
+        console.log("Admin email is undefined. Skipping...");
+        return;
+      }
 
-        //checking if email is undefined
-        if (!admin || !admin.email) {
-            console.log("Admin email is undefined. Skipping...");
-            return; 
-        }
-
-        
       const mailOptions = {
         from: process.env.EMAIL_USER,
-        to: admin.email,
+        to: replaceDomain(email),
         subject: req.body.subject,
         text: req.body.text,
       };
@@ -100,7 +64,7 @@ export const sendNotificationEmail = async (req, res) => {
     console.log('Emails sent to all admins');
     res.send("Emails have been sent to all admins");
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('Error sending emails:', error);
     res.status(500).send("Couldn't send emails to admins.");
   }
 };
