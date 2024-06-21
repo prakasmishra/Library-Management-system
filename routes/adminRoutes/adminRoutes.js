@@ -21,10 +21,13 @@ import { issuedToday } from '../../controllers/adminControllers/StatisticsContro
 import { returnedToday } from '../../controllers/adminControllers/StatisticsControllers/returnedToday.js';
 import { borrowedThisMonth } from '../../controllers/adminControllers/StatisticsControllers/borrowedThisMonth.js';
 import { totalOverdue } from '../../controllers/adminControllers/StatisticsControllers/totalOverdue.js';
-
+import { sendNotificationEmail } from '../../controllers/adminControllers/NotificationControllers/notificationController.js';
 
 
 const router = express.Router();
+
+//notification routes
+router.post('/notifications/send-notification', sendNotificationEmail);
 
 
 // book routes
