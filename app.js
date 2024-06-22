@@ -46,5 +46,6 @@ app.use(errorHandler);
 
 app.listen(PORT, () => {
   connectToDB();
-  console.log(`Server listening on port http://localhost:${PORT}`);
+  const d = new Date();
+  console.log(`Server listening on port http://localhost:${PORT} on ${d}`);
 });
