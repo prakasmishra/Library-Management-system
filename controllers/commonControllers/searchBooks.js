@@ -95,7 +95,7 @@ export const searchBooks2 = asyncHandler(async(req,res) => {
   await createIndexes();
 
 
-  const query = ' CREATE FULLTEXT INDEX  book_index  if not exists FOR (b:Book) ON EACH [b.title];';
+  const query = 'CREATE FULLTEXT INDEX  book_index  if not exists FOR (b:Book) ON EACH [b.title];';
 
   // querying the db
   // check for better regex
