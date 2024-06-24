@@ -26,9 +26,6 @@ export const reserveBook = async (req, res) => {
             lib_card_no: toInteger(-1),
             copy_no : toInteger(-1),
             status : "booked",
-            issue_date : "00-00-0000",
-            due_date :"00-00-0000",
-            return_date :"00-00-0000",
             fine : toInteger(0)
             }]->(book)`;
       const params = {
