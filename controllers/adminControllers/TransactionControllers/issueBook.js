@@ -116,6 +116,7 @@ export const issueBook = asyncHandler(async(req,res) => {
         }
 
         res.status(200).send({message : "Book issued successfully(Not booked,directly issued)"});
-    }    
+        return;
+    }   
     res.send({message : "Book issued successfully(formaly booked,not issued)"});
 })
