@@ -30,7 +30,7 @@ export const issueBook = asyncHandler(async(req,res) => {
         {isbn : transactionData.isbn}
     ));
 
-    if(!bookExists){
+    if(bookExists.length === 0){
         res.status(400);
         throw new Error("Book does not exist.");
     }
@@ -120,3 +120,4 @@ export const issueBook = asyncHandler(async(req,res) => {
     }   
     res.send({message : "Book issued successfully(formaly booked,not issued)"});
 })
+
