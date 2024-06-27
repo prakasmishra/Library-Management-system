@@ -5,7 +5,7 @@ import parser from 'parse-neo4j';
 export const getAllActiveNotice = asyncHandler(async(req,res) => {
     
     const query = `
-        MATCH (n:Notice {status : 'active'})
+        MATCH (n:Notice)
         RETURN n
     `;
     const result = await driver.executeQuery(query);
