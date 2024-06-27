@@ -11,7 +11,8 @@ export const issueNotice = asyncHandler(async(req,res) => {
         CREATE (n:Notice 
         {heading: $heading,
          body: $body,
-         date: $date
+         date: $date,
+         status: 'active'
         })
          RETURN n
     `;
