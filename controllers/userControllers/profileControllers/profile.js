@@ -20,7 +20,7 @@ export const profileHome = async (req, res) => {
     const deptDetails = parser.parse(res2);
     // console.log(memberDetails[0]);
     // console.log(deptDetails[0]);
-    // console.log(res3.data);
+    console.log(res3.data);
     const profile = {
       member: memberDetails[0],
       department: deptDetails[0],
