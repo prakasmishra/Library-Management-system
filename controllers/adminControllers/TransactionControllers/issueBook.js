@@ -3,6 +3,7 @@ import driver, { convertToNeo4jInteger } from "../../../utils/neo4j-driver.js"
 import asyncHandler from "express-async-handler"
 import { addDaysToDate } from "./utils/addDate.js";
 import parser from 'parse-neo4j';
+import { modifyLibCardString } from "./utils/modifyLibCardString.js";
 
 // change lib card status
 
@@ -47,7 +48,7 @@ export const issueBook = asyncHandler(async(req,res) => {
         {membership_id : transactionData.membership_id}
     ));
 
-    if(!memberExists){
+    if(memberExists.length === 0){
         res.status(400);
         throw new Error("member does not exist.");
     }
@@ -66,11 +67,36 @@ export const issueBook = asyncHandler(async(req,res) => {
         res.status(400);
         throw new Error("Book already issued");
     }
+
+    // check for lib card no
+    const library_card_max_count = process.env.MAX_LIBRARY_CARD_COUNT;
+    
+    if(transactionData.lib_card_no <= 0 || transactionData.lib_card_no > library_card_max_count){
+        res.status(400);
+        throw new Error("Invalid library card no. provided.");
+    }
+    
+    // find lib_card string of member
+    const lib_card_string = memberExists[0].library_card_string;
+    console.log(lib_card_string);
+
+    // check library card avaialable or not
+    if(lib_card_string[transactionData.lib_card_no - 1] === '1'){
+        res.status(400);
+        throw new Error("library card not available, already occupied");        
+    }
+
+    var new_lib_card_string = modifyLibCardString(lib_card_string,transactionData.lib_card_no,"1");
+    transactionData.new_lib_card_string = new_lib_card_string;
+    console.log("lib card string (on issue) : ",new_lib_card_string);
+    // return;
+
+
     // find booked tx , update status and dates
     // also update book avaialbility
 
     const query2 = `
-        MATCH (:Member {membership_id : $membership_id})-
+        MATCH (m :Member {membership_id : $membership_id})-
         [t:TRANSACTION {status : 'booked'}]->
         (b:Book {isbn : $isbn})
         SET t.status = 'issued',
@@ -79,7 +105,8 @@ export const issueBook = asyncHandler(async(req,res) => {
         t.copy_no = $copy_no,
         t.lib_card_no = $lib_card_no,
         t.renewal_count = $renewal_count,
-        b.no_of_copies = b.no_of_copies-1
+        b.no_of_copies = b.no_of_copies-1,
+        m.library_card_string = $new_lib_card_string
         RETURN t
     `;
     
@@ -94,7 +121,7 @@ export const issueBook = asyncHandler(async(req,res) => {
         console.log("No booked tx found , creating new issue tx...");
         
         const query3 = `
-        MATCH (m:Member {membership_id : $membership_id}),
+        MATCH (m :Member {membership_id : $membership_id}),
         (b:Book {isbn : $isbn})
         CREATE (m)-[t:TRANSACTION {
             status : 'issued',
@@ -104,8 +131,9 @@ export const issueBook = asyncHandler(async(req,res) => {
             lib_card_no : $lib_card_no,
             renewal_count : $renewal_count
          }]->(b)
-        WITH b,t
-        SET b.no_of_copies = b.no_of_copies-1
+        WITH b,t,m
+        SET b.no_of_copies = b.no_of_copies-1,
+        m.library_card_string = $new_lib_card_string
         RETURN t
         `;
 
