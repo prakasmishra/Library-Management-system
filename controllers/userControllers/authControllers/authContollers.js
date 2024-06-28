@@ -15,7 +15,14 @@ export const addUserDetails = async (req, res) => {
       phone_number,
       email,
     } = req.body;
-    const library_card_string = "000";
+
+    // generate library card string
+    const library_card_count = process.env.MAX_LIBRARY_CARD_COUNT;
+    const library_card_string = '0'.repeat(library_card_count);
+
+    console.log("library card string ",library_card_string);
+    
+
     const status = "pending";
     const q = `
     MATCH (m:Member {membership_id: $membership_id}) 
