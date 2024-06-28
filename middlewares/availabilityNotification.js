@@ -27,6 +27,7 @@ export const notifyOnAvailable = async (req, res, next) => {
     const response = parser.parse(
       await driver.executeQuery(checkQuery, checkContext)
     );
+
     const copyFreq = response[0].no_of_copies;
     if (updatedCount === undefined) {
       updatedCount = 1;
@@ -38,6 +39,7 @@ export const notifyOnAvailable = async (req, res, next) => {
     console.log(copyFreq);
     next();
   } catch (error) {
-    next(new Error("Server Error"));
+    res.status(404);
+    next(new Error("Book not found"));
   }
 };

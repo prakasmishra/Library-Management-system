@@ -25,7 +25,7 @@ export const searchBooks = asyncHandler(async (req, res) => {
     // querying the db
     // check for better regex
     // using subseq
-     //   const regexQuery = decodedStringValue.split('').map(char => `${char}.*`).join('');
+    //   const regexQuery = decodedStringValue.split('').map(char => `${char}.*`).join('');
     //   const regex = `(?i).*${regexQuery}`; // Case-insensitive subsequence match
   
     // const regexQuery
