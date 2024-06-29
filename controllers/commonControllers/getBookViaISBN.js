@@ -1,9 +1,9 @@
-import driver from "../../../utils/neo4j-driver.js"
+import driver from "../../utils/neo4j-driver.js"
 
 import asyncHandler from "express-async-handler"
 import parser from "parse-neo4j";
 
-export const getBook = asyncHandler(async(req,res)=>{
+export const getBookViaISBN = asyncHandler(async(req,res)=>{
 
     const isbn_value = req.params.isbn_value;
 
