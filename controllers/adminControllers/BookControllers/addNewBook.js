@@ -60,6 +60,7 @@ export const addNewBook = asyncHandler(async(req,res) => {
     )
     .catch((parseError) => {
       console.error(`Parsing error: ${parseError}`); 
+      res.status(400).send({message : "Parsing error."});
     });
 
     const responseArray = parser.parse(resultBookPromise);

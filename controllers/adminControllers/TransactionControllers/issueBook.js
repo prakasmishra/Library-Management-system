@@ -4,6 +4,7 @@ import asyncHandler from "express-async-handler"
 import { addDaysToDate } from "./utils/addDate.js";
 import parser from 'parse-neo4j';
 import { modifyLibCardString } from "./utils/modifyLibCardString.js";
+import { formatDate } from "./utils/formatDate.js";
 
 // change lib card status
 
@@ -12,10 +13,10 @@ export const issueBook = asyncHandler(async(req,res) => {
     const transactionData = req.body;
     
     // calculate due_date
-    console.log(transactionData.issue_date);
-    if(transactionData.issue_date === undefined){
-        res.status(400).send("Incomplete data");
-    }
+    
+    const issue_date = formatDate(new Date());
+    transactionData.issue_date = issue_date;
+    console.log("Issue date : ",issue_date);
 
     const due_time_in_day = process.env.DUE_DAY_COUNT;
     const due_date = addDaysToDate(transactionData.issue_date,due_time_in_day);

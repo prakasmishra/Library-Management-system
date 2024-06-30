@@ -5,9 +5,13 @@ import parser from 'parse-neo4j'
 import { subtractDates } from "./utils/daysDiff.js";
 import { compareDates } from "./utils/compareDate.js";
 import { modifyLibCardString } from "./utils/modifyLibCardString.js";
+import { formatDate } from "./utils/formatDate.js";
 export const returnBook = asyncHandler(async(req,res) => {
     const transactionData = req.body;
     console.log("Isssue data ",transactionData);
+
+    const  return_date = formatDate(new Date());
+    transactionData.return_date = return_date;
 
    // find the due date
 
@@ -73,5 +77,5 @@ export const returnBook = asyncHandler(async(req,res) => {
 
     // if not found , create new issue tx
    
-    res.send(parsedResult[0]);
+    res.send({fine : parsedResult[0].fine});
 })
