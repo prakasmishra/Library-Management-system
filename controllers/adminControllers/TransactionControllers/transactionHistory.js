@@ -1,10 +1,22 @@
 import driver,{ convertToNeo4jInteger }  from "../../../utils/neo4j-driver.js"
 import parser from "parse-neo4j";
+import { formatDateToYYYYMMDD } from "./utils/formatToUs.js";
 // import asyncHandler from "express-async-handler"
 
 export const getHistory = async (req, res) => {
     try {
         const { memberId, isbn, status } = req.query;
+
+        let {firstdate}  = req.query;
+
+        if(!firstdate){
+            firstdate = "01-01-0000";           
+        }
+
+        firstdate = formatDateToYYYYMMDD(firstdate);
+        console.log(`${memberId} - ${isbn} - ${status} - ${firstdate}`);
+
+        // console.log(firstdate);
         let count =parseInt(req.query.count,10);
         if(!count){
             // console.log(count);
@@ -20,6 +32,25 @@ export const getHistory = async (req, res) => {
             MATCH (m:Member)
             -[t:TRANSACTION]->(b:Book)
             WHERE t.status IN ["issued", "returned", "late"] 
+
+             AND
+             (
+                date(datetime({year: toInteger(split(t.issue_date, '-')[2]), 
+                month: toInteger(split(t.issue_date, '-')[1]), 
+                day: toInteger(split(t.issue_date, '-')[0])})) >= date($firstdate)
+
+                OR 
+
+                    (
+                        t.status = 'returned' AND
+                        date(datetime({year: toInteger(split(t.return_date, '-')[2]), 
+                        month: toInteger(split(t.return_date, '-')[1]), 
+                        day: toInteger(split(t.return_date, '-')[0])})) >= date($firstdate)
+                    )
+    
+            )
+
+
             RETURN t AS transaction, b.isbn AS isbn, m.membership_id AS memberId
             ORDER BY date(datetime({ year: toInteger(substring(t.issue_date, 6, 4)), 
                 month: toInteger(substring(t.issue_date, 3, 2)), 
@@ -32,6 +63,26 @@ export const getHistory = async (req, res) => {
             MATCH (m:Member )
             -[t:TRANSACTION]->(b:Book )
             WHERE (t.status = $status)
+
+
+            AND
+             (
+                date(datetime({year: toInteger(split(t.issue_date, '-')[2]), 
+                month: toInteger(split(t.issue_date, '-')[1]), 
+                day: toInteger(split(t.issue_date, '-')[0])})) >= date($firstdate)
+
+                OR 
+
+                    (
+                        t.status = 'returned' AND
+                        date(datetime({year: toInteger(split(t.return_date, '-')[2]), 
+                        month: toInteger(split(t.return_date, '-')[1]), 
+                        day: toInteger(split(t.return_date, '-')[0])})) >= date($firstdate)
+                    )
+    
+            )
+
+            
             RETURN t AS transaction, b.isbn AS isbn, m.membership_id AS memberId
             ORDER BY date(datetime({ year: toInteger(substring(t.issue_date, 6, 4)), 
                 month: toInteger(substring(t.issue_date, 3, 2)), 
@@ -44,6 +95,24 @@ export const getHistory = async (req, res) => {
             MATCH (m:Member )
             -[t:TRANSACTION]->(b:Book {isbn: $isbn})
             WHERE t.status IN ["issued", "returned", "late"] 
+
+            AND
+             (
+                date(datetime({year: toInteger(split(t.issue_date, '-')[2]), 
+                month: toInteger(split(t.issue_date, '-')[1]), 
+                day: toInteger(split(t.issue_date, '-')[0])})) >= date($firstdate)
+
+                OR 
+
+                    (
+                        t.status = 'returned' AND
+                        date(datetime({year: toInteger(split(t.return_date, '-')[2]), 
+                        month: toInteger(split(t.return_date, '-')[1]), 
+                        day: toInteger(split(t.return_date, '-')[0])})) >= date($firstdate)
+                    )
+    
+            )
+
             RETURN t AS transaction, b.isbn AS isbn, m.membership_id AS memberId
             ORDER BY date(datetime({ year: toInteger(substring(t.issue_date, 6, 4)), 
                 month: toInteger(substring(t.issue_date, 3, 2)), 
@@ -56,6 +125,25 @@ export const getHistory = async (req, res) => {
             MATCH (m:Member )
             -[t:TRANSACTION]->(b:Book {isbn: $isbn})
             WHERE (t.status = $status)
+
+            AND
+             (
+                date(datetime({year: toInteger(split(t.issue_date, '-')[2]), 
+                month: toInteger(split(t.issue_date, '-')[1]), 
+                day: toInteger(split(t.issue_date, '-')[0])})) >= date($firstdate)
+
+                OR 
+
+                    (
+                        t.status = 'returned' AND
+                        date(datetime({year: toInteger(split(t.return_date, '-')[2]), 
+                        month: toInteger(split(t.return_date, '-')[1]), 
+                        day: toInteger(split(t.return_date, '-')[0])})) >= date($firstdate)
+                    )
+    
+            )
+
+
             RETURN t AS transaction, b.isbn AS isbn, m.membership_id AS memberId
             ORDER BY date(datetime({ year: toInteger(substring(t.issue_date, 6, 4)), 
                 month: toInteger(substring(t.issue_date, 3, 2)), 
@@ -68,6 +156,26 @@ export const getHistory = async (req, res) => {
             MATCH (m:Member {membership_id: $memberId})
             -[t:TRANSACTION]->(b:Book )
             WHERE t.status IN ["issued", "returned", "late"] 
+
+
+            AND
+             (
+                date(datetime({year: toInteger(split(t.issue_date, '-')[2]), 
+                month: toInteger(split(t.issue_date, '-')[1]), 
+                day: toInteger(split(t.issue_date, '-')[0])})) >= date($firstdate)
+
+                OR 
+
+                    (
+                        t.status = 'returned' AND
+                        date(datetime({year: toInteger(split(t.return_date, '-')[2]), 
+                        month: toInteger(split(t.return_date, '-')[1]), 
+                        day: toInteger(split(t.return_date, '-')[0])})) >= date($firstdate)
+                    )
+    
+            )
+
+
             RETURN t as transaction, b.isbn AS isbn, m.membership_id AS memberId
             ORDER BY date(datetime({ year: toInteger(substring(t.issue_date, 6, 4)), 
                 month: toInteger(substring(t.issue_date, 3, 2)), 
@@ -80,6 +188,26 @@ export const getHistory = async (req, res) => {
             MATCH (m:Member {membership_id: $memberId})
             -[t:TRANSACTION]->(b:Book )
             WHERE (t.status = $status)
+
+
+            AND
+             (
+                date(datetime({year: toInteger(split(t.issue_date, '-')[2]), 
+                month: toInteger(split(t.issue_date, '-')[1]), 
+                day: toInteger(split(t.issue_date, '-')[0])})) >= date($firstdate)
+
+                OR 
+
+                    (
+                        t.status = 'returned' AND
+                        date(datetime({year: toInteger(split(t.return_date, '-')[2]), 
+                        month: toInteger(split(t.return_date, '-')[1]), 
+                        day: toInteger(split(t.return_date, '-')[0])})) >= date($firstdate)
+                    )
+    
+            )
+
+
             RETURN t AS transaction, b.isbn AS isbn, m.membership_id AS memberId
             ORDER BY date(datetime({ year: toInteger(substring(t.issue_date, 6, 4)), 
                 month: toInteger(substring(t.issue_date, 3, 2)), 
@@ -92,6 +220,26 @@ export const getHistory = async (req, res) => {
             MATCH (m:Member {membership_id: $memberId})
             -[t:TRANSACTION]->(b:Book {isbn: $isbn})
             WHERE t.status IN ["issued", "returned", "late"] 
+
+
+            AND
+             (
+                date(datetime({year: toInteger(split(t.issue_date, '-')[2]), 
+                month: toInteger(split(t.issue_date, '-')[1]), 
+                day: toInteger(split(t.issue_date, '-')[0])})) >= date($firstdate)
+
+                OR 
+
+                    (
+                        t.status = 'returned' AND
+                        date(datetime({year: toInteger(split(t.return_date, '-')[2]), 
+                        month: toInteger(split(t.return_date, '-')[1]), 
+                        day: toInteger(split(t.return_date, '-')[0])})) >= date($firstdate)
+                    )
+    
+            )
+
+
             RETURN t AS transaction, b.isbn AS isbn, m.membership_id AS memberId
             ORDER BY date(datetime({ year: toInteger(substring(t.issue_date, 6, 4)), 
                 month: toInteger(substring(t.issue_date, 3, 2)), 
@@ -104,6 +252,24 @@ export const getHistory = async (req, res) => {
             MATCH (m:Member {membership_id: $memberId})
             -[t:TRANSACTION]->(b:Book {isbn: $isbn})
             WHERE (t.status = $status)
+
+            AND
+             (
+                date(datetime({year: toInteger(split(t.issue_date, '-')[2]), 
+                month: toInteger(split(t.issue_date, '-')[1]), 
+                day: toInteger(split(t.issue_date, '-')[0])})) >= date($firstdate)
+
+                OR 
+
+                    (
+                        t.status = 'returned' AND
+                        date(datetime({year: toInteger(split(t.return_date, '-')[2]), 
+                        month: toInteger(split(t.return_date, '-')[1]), 
+                        day: toInteger(split(t.return_date, '-')[0])})) >= date($firstdate)
+                    )
+    
+            )
+
             RETURN t AS transaction, b.isbn AS isbn, m.membership_id AS memberId
             ORDER BY date(datetime({ year: toInteger(substring(t.issue_date, 6, 4)), 
                 month: toInteger(substring(t.issue_date, 3, 2)), 
@@ -115,7 +281,8 @@ export const getHistory = async (req, res) => {
             memberId: memberId,
             isbn: isbn,
             status: status,
-            count : count
+            count : count,
+            firstdate : firstdate
         }
         const result = await driver.executeQuery(query, params);
         const response = parser.parse(result);
@@ -124,6 +291,7 @@ export const getHistory = async (req, res) => {
             res.status(200).send({ message: "no transactions to show" });
         }
         else {
+            console.log("count ",response.length);
             res.status(200).send(response);
         }
     } catch (error) {
@@ -131,3 +299,4 @@ export const getHistory = async (req, res) => {
     }
     // res.send("TODO :History returned successfully");
 }
+

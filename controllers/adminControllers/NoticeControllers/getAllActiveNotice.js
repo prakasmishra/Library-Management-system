@@ -6,7 +6,7 @@ export const getAllActiveNotice = asyncHandler(async(req,res) => {
     
     const query = `
         MATCH (n:Notice)
-         RETURN n
+        RETURN n
     `;
     const result = await driver.executeQuery(query);
     const parsedResult = parser.parse(result);

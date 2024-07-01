@@ -1,6 +1,7 @@
 import axios from "axios";
 import driver from "../../../utils/neo4j-driver.js";
 import parser from "parse-neo4j";
+import asyncHandler from "express-async-handler";
 
 export const profileHome = async (req, res) => {
   const id = req.params.id;
@@ -20,7 +21,7 @@ export const profileHome = async (req, res) => {
     const deptDetails = parser.parse(res2);
     // console.log(memberDetails[0]);
     // console.log(deptDetails[0]);
-    // console.log(res3.data);
+    console.log(res3.data);
     const profile = {
       member: memberDetails[0],
       department: deptDetails[0],
@@ -107,3 +108,59 @@ export const addFavSub = async (req, res) => {
     res.status(500).send({ Error: error });
   }
 };
+
+export const getLibraryCardInfo = asyncHandler(async (req,res) => {
+    const id = req.params.id;
+    console.log("member_id : ",id);
+
+    const queryMember = `MATCH (member:Member {membership_id : $member_id})
+                  RETURN member
+    `;
+
+    const resultMember = parser.parse(await driver.executeQuery(queryMember,{member_id : id}));
+    if(resultMember.length === 0){
+       res.status(404);
+       throw new Error("Member does not exists.");
+    }
+
+    console.log(resultMember);
+
+
+    const query = `MATCH (member:Member {membership_id : $member_id})-
+                  [transaction:TRANSACTION {status : 'issued'}]->
+                  (book:Book),
+                  (author:Author)-[:WROTE]->(book)
+                  RETURN transaction,book.title as book_title, author.author_name as author_name
+    `;
+
+    const result = parser.parse(await driver.executeQuery(query,{member_id : id}));
+    
+    console.log("tx array ",result);
+
+    const lib_card_string = resultMember[0].library_card_string;
+    console.log("card string : ",lib_card_string);
+
+    var responseArray = result.map(obj => {
+        const responseObj = {
+           library_card_no : obj.transaction.lib_card_no,
+           status : 'occupied',
+           issue_date : obj.transaction.issue_date,
+           due_date : obj.transaction.due_date,
+           book_title : obj.book_title,
+           author_name : obj.author_name
+        }
+        return responseObj;
+    })
+
+
+     for(var i=0;i<lib_card_string.length;i++){
+        if(lib_card_string[i] === '0'){
+            responseArray.push({
+              library_card_no : (i+1),
+              status : 'available'
+            });
+        }
+     }
+
+    res.send(responseArray);
+})
