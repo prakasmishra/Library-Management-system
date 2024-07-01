@@ -35,7 +35,7 @@ export const reserveBook = async (req, res) => {
       const result = await driver.executeQuery(query, params);
 
       //sending notification emails to admins
-      await sendNotificationEmail(req, res);
+      //await sendNotificationEmail(req, res);
 
       res.status(200).send({ message: "book reserved" });
       // console.log("hello");
