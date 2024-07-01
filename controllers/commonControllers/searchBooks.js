@@ -3,6 +3,7 @@ import { convertToNeo4jInteger } from "../../utils/neo4j-driver.js";
 import asyncHandler from "express-async-handler";
 import parser from "parse-neo4j";
 import * as queries from './queries.js';
+import { removeStopWords } from "./removeStopWords.js";
 
 
 
@@ -29,7 +30,7 @@ export const searchBooks = asyncHandler(async (req, res) => {
     //   const regex = `(?i).*${regexQuery}`; // Case-insensitive subsequence match
   
     // const regexQuery
-    const regex = decodedStringValue.split(' ').map(str => str.toLowerCase());  
+    const regex = removeStopWords(decodedStringValue.split(' ').map(str => str.toLowerCase()));  
     console.log("Regex is ", regex);
     // return;  
     

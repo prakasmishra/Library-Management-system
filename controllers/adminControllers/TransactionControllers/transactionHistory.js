@@ -300,9 +300,3 @@ export const getHistory = async (req, res) => {
     // res.send("TODO :History returned successfully");
 }
 
-/*
-AND date(datetime({year: toInteger(split(r.issue_date, '-')[2]), 
-    month: toInteger(split(r.issue_date, '-')[1]), 
-    day: toInteger(split(r.issue_date, '-')[0])})) > date($firstDate)
-
-*/
