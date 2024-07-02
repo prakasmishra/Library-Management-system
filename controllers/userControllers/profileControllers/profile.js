@@ -85,131 +85,132 @@ export const removeFavSub = async (req, res) => {
   }
 };
 
-// export const addFavSub =  async (req, res) => {
-//   try {
-//     const memberId = req.params.id;
-//     const { sub_name } = req.body;
-//     const query = `MATCH (s:Subject {sub_name : $sub_name})
-//                 MATCH (m:Member {membership_id : $member_id})
-//                 CREATE (m)-[r:FAVSUBJECT {}]->(s)
-//                 RETURN r,m,s`;
-//     const context = {
-//       sub_name: sub_name,
-//       member_id: memberId,
-//     };
-//     const result = await driver.executeQuery(query, context);
-//     let toSend = [];
-//     toSend.push(result.records[0].get("m").properties);
-//     // toSend.push(result.records[0].get("r").properties);
-//     toSend.push(result.records[0].get("s").properties);
-//     console.log(toSend);
-//     res.status(200).send(toSend);
-//   } catch (error) {
-//     res.status(500).send({ Error: error });
-//   }
-// };
-
-
 export const addFavSub = asyncHandler(async (req, res) => {
-      const memberId = req.params.id;
-      const { sub_name } = req.body;
+  try {
+    const memberId = req.params.id;
+    const newList = req.body.sub_list;
+    const removedSub = [];
+    // Validating the member ----------------------------------------------------------------
+    const memberCheckQuery = `MATCH (n:Member {membership_id : $memberId}) RETURN n`;
+    const result1 = parser.parse(
+      await driver.executeQuery(memberCheckQuery, { memberId: memberId })
+    );
+    if (result1.length === 0) {
+      res.status(404).send("Not a valid Member");
+      throw new Error("Member does not exists.");
+    }
 
-      const checkSub = `
-        MATCH (s:Subject {sub_name: $sub_name})
-        RETURN s
-      `;
-
-      const result = parser.parse(await driver.executeQuery(checkSub,{sub_name : sub_name}));
-
-      if(result.length === 0){
-          res.status(400);
-          throw new Error("No such subject exists.");
+    const currFavSubCall = await axios.get(
+      `https://library-management-system-f9gh.onrender.com/api/user/profile/get/fav-sub/${memberId}`
+    );
+    const currFavSub = currFavSubCall.data;
+    for (const oldSub of currFavSub) {
+      const index = newList.indexOf(oldSub);
+      if (index === -1) {
+        console.log("sub : ", oldSub);
+        removedSub.push(oldSub);
+      } else {
+        newList.splice(index, 1);
       }
-
-       //---------------------------------Checking For Relation----------------------------------------------------------------------------
-      const checkQuery = `
-        MATCH (m:Member {membership_id: $membership_id})-[r:FAVSUBJECT]->(s:Subject {sub_name: $sub_name})
-        RETURN count(r) AS relationshipCount;
-      `;
-      const checkContext = {
-        membership_id: memberId,
-        sub_name: sub_name,
-      };
-      const checkResult = await driver.executeQuery(checkQuery, checkContext);
-
-      const relationshipCount = checkResult.records[0].get("relationshipCount");
-
-      if(relationshipCount > 0){
-         res.status(200);
-         res.send({message: "Favourite Subject already added"});
-         return;
-      }
-
-
-      const createQuery = `
-       MATCH (s:Subject {sub_name : $sub_name})
-                MATCH (m:Member {membership_id : $membership_id})
+    }
+    console.log("removeFavSub : ", removedSub);
+    console.log("newList : ", newList);
+    const createQuery = `
+                MATCH (s:Subject {sub_name : $sub_name})
+                MATCH (m:Member {membership_id : $memberId})
                 CREATE (m)-[r:FAVSUBJECT {}]->(s)
-                RETURN r,m,s
-      `;
-      const createResult = parser.parse(await driver.executeQuery(createQuery, checkContext));
+                RETURN r,m,s`;
 
-      res.send({message : "Subject added successfully"});
+    for (const sub of newList) {
+      try {
+        const result = await driver.executeQuery(createQuery, {
+          sub_name: sub,
+          memberId: memberId,
+        });
+      } catch (error) {
+        res.status(500).send({ error: error });
+      }
+    }
+
+    const deleteQuery = `MATCH (m:Member {membership_id: $memberId})-[r:FAVSUBJECT]->(s:Subject {sub_name: $sub_name})
+  Delete r`;
+    for (const sub of removedSub) {
+      try {
+        const result = await driver.executeQuery(deleteQuery, {
+          sub_name: sub,
+          memberId: memberId,
+        });
+      } catch (error) {
+        res.status(500).send({ error: error });
+      }
+    }
+
+    const newFavSub = await axios.get(
+      `https://library-management-system-f9gh.onrender.com/api/user/profile/get/fav-sub/${memberId}`
+    );
+
+    console.log("New Fav : ", newFavSub.data);
+
+    res.status(200).send("Update Successful");
+  } catch (error) {
+    res.status(500).send({ error: error });
+  }
 });
 
+export const getLibraryCardInfo = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+  console.log("member_id : ", id);
 
-export const getLibraryCardInfo = asyncHandler(async (req,res) => {
-    const id = req.params.id;
-    console.log("member_id : ",id);
-
-    const queryMember = `MATCH (member:Member {membership_id : $member_id})
+  const queryMember = `MATCH (member:Member {membership_id : $member_id})
                   RETURN member
     `;
 
-    const resultMember = parser.parse(await driver.executeQuery(queryMember,{member_id : id}));
-    if(resultMember.length === 0){
-       res.status(404);
-       throw new Error("Member does not exists.");
-    }
+  const resultMember = parser.parse(
+    await driver.executeQuery(queryMember, { member_id: id })
+  );
+  if (resultMember.length === 0) {
+    res.status(404);
+    throw new Error("Member does not exists.");
+  }
 
-    console.log(resultMember);
+  console.log(resultMember);
 
-
-    const query = `MATCH (member:Member {membership_id : $member_id})-
+  const query = `MATCH (member:Member {membership_id : $member_id})-
                   [transaction:TRANSACTION {status : 'issued'}]->
                   (book:Book),
                   (author:Author)-[:WROTE]->(book)
                   RETURN transaction,book.title as book_title, author.author_name as author_name
     `;
 
-    const result = parser.parse(await driver.executeQuery(query,{member_id : id}));
-    
-    console.log("tx array ",result);
+  const result = parser.parse(
+    await driver.executeQuery(query, { member_id: id })
+  );
 
-    const lib_card_string = resultMember[0].library_card_string;
-    console.log("card string : ",lib_card_string);
+  console.log("tx array ", result);
 
-    var responseArray = result.map(obj => {
-        const responseObj = {
-           library_card_no : obj.transaction.lib_card_no,
-           status : 'occupied',
-           issue_date : obj.transaction.issue_date,
-           due_date : obj.transaction.due_date,
-           book_title : obj.book_title,
-           author_name : obj.author_name
-        }
-        return responseObj;
-    })
+  const lib_card_string = resultMember[0].library_card_string;
+  console.log("card string : ", lib_card_string);
 
+  var responseArray = result.map((obj) => {
+    const responseObj = {
+      library_card_no: obj.transaction.lib_card_no,
+      status: "occupied",
+      issue_date: obj.transaction.issue_date,
+      due_date: obj.transaction.due_date,
+      book_title: obj.book_title,
+      author_name: obj.author_name,
+    };
+    return responseObj;
+  });
 
-     for(var i=0;i<lib_card_string.length;i++){
-        if(lib_card_string[i] === '0'){
-            responseArray.push({
-              library_card_no : (i+1),
-              status : 'available'
-            });
-        }
-     }
+  for (var i = 0; i < lib_card_string.length; i++) {
+    if (lib_card_string[i] === "0") {
+      responseArray.push({
+        library_card_no: i + 1,
+        status: "available",
+      });
+    }
+  }
 
-    res.send(responseArray);
-})
+  res.send(responseArray);
+});
