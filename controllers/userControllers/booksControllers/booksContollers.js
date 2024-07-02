@@ -48,6 +48,8 @@ export const wishlistBook = async (req, res) => {
   try {
     const memberId = req.params.memberId;
     const isbn = req.params.isbn;
+    const checkQuery = `MATCH (m:Member{membership_id: $member_id}) RETURN m.membership_id`;
+
     const helperQuery = `
         MATCH (m:Member{membership_id: $member_id}) 
         -[:WISHLIST]-> (book:Book {isbn: $isbn})
@@ -57,17 +59,25 @@ export const wishlistBook = async (req, res) => {
       member_id: memberId,
       isbn: isbn,
     };
-    const helperResult = await driver.executeQuery(helperQuery, params);
-    const response = parser.parse(helperResult);
-    if (response.length === 0) {
-      const query = `
-            MATCH (member:Member {membership_id: $member_id}), (book:Book {isbn: $isbn})
-            MERGE (member)-[:WISHLIST]->(book)`;
+    const checkQueryResult = await driver.executeQuery(helperQuery, params);
+    const checkResponse = parser.parse(checkQueryResult);
+    if (checkResponse.length == 0) {
+      res.status(200).send({ message: "Member does not exist" });
+    }
+    else {
 
-      const result = await driver.executeQuery(query, params);
-      res.status(200).send({ message: "wishlisted" });
-    } else {
-      res.status(200).send({ message: "Already in your wishlist" });
+      const helperResult = await driver.executeQuery(helperQuery, params);
+      const response = parser.parse(helperResult);
+      if (response.length === 0) {
+        const query = `
+        MATCH (member:Member {membership_id: $member_id}), (book:Book {isbn: $isbn})
+        MERGE (member)-[:WISHLIST]->(book)`;
+
+        const result = await driver.executeQuery(query, params);
+        res.status(200).send({ message: "wishlisted" });
+      } else {
+        res.status(200).send({ message: "Already in your wishlist" });
+      }
     }
   } catch (error) {
     console.error("Something went wrong:", error);
