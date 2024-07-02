@@ -13,12 +13,12 @@ export const searchBooks = asyncHandler(async (req, res) => {
     
   const stringValue = req.params.string_value.replace(/\+/g, "%20");// replaces '+' with %20
   const decodedStringValue = decodeURIComponent(stringValue);// decodes %20 as ' '
-  console.log(`String-value-terms = ${decodedStringValue}`);
+  // console.log(`String-value-terms = ${decodedStringValue}`);
   
   // availability=true/false sortby=edition/popularity
     const { availability, sortby  } = req.query;
-    console.log(`availability = ${availability} , ${typeof availability} `);
-    console.log(`sortby = ${sortby}`);
+    // console.log(`availability = ${availability} , ${typeof availability} `);
+    // console.log(`sortby = ${sortby}`);
     
     
     const limit = convertToNeo4jInteger(process.env.MAX_API_BOOK_LIMIT);
@@ -31,7 +31,7 @@ export const searchBooks = asyncHandler(async (req, res) => {
   
     // const regexQuery
     const regex = removeStopWords(decodedStringValue.split(' ').map(str => str.toLowerCase()));  
-    console.log("Regex is ", regex);
+    // console.log("Regex is ", regex);
     // return;  
     
     var query;
@@ -51,7 +51,7 @@ export const searchBooks = asyncHandler(async (req, res) => {
     else{
        query = queries.sortByPopularityDesc;
     }
-    console.log(query);
+    // console.log(query);
   
     
     
@@ -61,13 +61,13 @@ export const searchBooks = asyncHandler(async (req, res) => {
       {regex : regex,limit : limit}
     )
     .catch((parseError) => {
-      console.error(`Parsing error: ${parseError}`); 
+      // console.error(`Parsing error: ${parseError}`); 
       res.status(500);
       throw new Error("Data parsing error");
     });
     
     const responseArray = parser.parse(resultBooksPromise);
-    console.log("Query result: ", responseArray.length);
+    // console.log("Query result: ", responseArray.length);
     
     res.status(200).send(responseArray);
   });
@@ -78,12 +78,12 @@ export const searchBooks = asyncHandler(async (req, res) => {
     
 //     const stringValue = req.params.string_value.replace(/\+/g, "%20");// replaces '+' with %20
 //     const decodedStringValue = decodeURIComponent(stringValue);// decodes %20 as ' '
-//     console.log(`String-value-terms = ${decodedStringValue}`);
+//     // console.log(`String-value-terms = ${decodedStringValue}`);
     
 //     // availability=true/false sortby=edition/popularity
 //     const { availability, sortby  } = req.query;
-//     console.log(`availability = ${availability} , ${typeof availability} `);
-//     console.log(`sortby = ${sortby}`);
+//     // console.log(`availability = ${availability} , ${typeof availability} `);
+//     // console.log(`sortby = ${sortby}`);
     
     
 //     const limit = convertToNeo4jInteger(process.env.MAX_API_BOOK_LIMIT);
@@ -102,13 +102,13 @@ export const searchBooks = asyncHandler(async (req, res) => {
 //       query
 //     )
 //     .catch((parseError) => {
-//       console.error(`Parsing error: ${parseError}`); 
+//       // console.error(`Parsing error: ${parseError}`); 
 //       res.status(500);
 //       throw new Error("Data parsing error");
 //     });
 
 //   const responseArray = parser.parse(resultBooksPromise);
-//   console.log("Query result: ", responseArray.length);
+//   // console.log("Query result: ", responseArray.length);
 
 //   res.status(200).send(responseArray);
 // })
