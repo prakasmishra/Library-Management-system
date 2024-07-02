@@ -85,29 +85,78 @@ export const removeFavSub = async (req, res) => {
   }
 };
 
-export const addFavSub = async (req, res) => {
-  try {
-    const memberId = req.params.id;
-    const { sub_name } = req.body;
-    const query = `MATCH (s:Subject {sub_name : $sub_name})
-                MATCH (m:Member {membership_id : $member_id})
+// export const addFavSub =  async (req, res) => {
+//   try {
+//     const memberId = req.params.id;
+//     const { sub_name } = req.body;
+//     const query = `MATCH (s:Subject {sub_name : $sub_name})
+//                 MATCH (m:Member {membership_id : $member_id})
+//                 CREATE (m)-[r:FAVSUBJECT {}]->(s)
+//                 RETURN r,m,s`;
+//     const context = {
+//       sub_name: sub_name,
+//       member_id: memberId,
+//     };
+//     const result = await driver.executeQuery(query, context);
+//     let toSend = [];
+//     toSend.push(result.records[0].get("m").properties);
+//     // toSend.push(result.records[0].get("r").properties);
+//     toSend.push(result.records[0].get("s").properties);
+//     console.log(toSend);
+//     res.status(200).send(toSend);
+//   } catch (error) {
+//     res.status(500).send({ Error: error });
+//   }
+// };
+
+
+export const addFavSub = asyncHandler(async (req, res) => {
+      const memberId = req.params.id;
+      const { sub_name } = req.body;
+
+      const checkSub = `
+        MATCH (s:Subject {sub_name: $sub_name})
+        RETURN s
+      `;
+
+      const result = parser.parse(await driver.executeQuery(checkSub,{sub_name : sub_name}));
+
+      if(result.length === 0){
+          res.status(400);
+          throw new Error("No such subject exists.");
+      }
+
+       //---------------------------------Checking For Relation----------------------------------------------------------------------------
+      const checkQuery = `
+        MATCH (m:Member {membership_id: $membership_id})-[r:FAVSUBJECT]->(s:Subject {sub_name: $sub_name})
+        RETURN count(r) AS relationshipCount;
+      `;
+      const checkContext = {
+        membership_id: memberId,
+        sub_name: sub_name,
+      };
+      const checkResult = await driver.executeQuery(checkQuery, checkContext);
+
+      const relationshipCount = checkResult.records[0].get("relationshipCount");
+
+      if(relationshipCount > 0){
+         res.status(200);
+         res.send({message: "Favourite Subject already added"});
+         return;
+      }
+
+
+      const createQuery = `
+       MATCH (s:Subject {sub_name : $sub_name})
+                MATCH (m:Member {membership_id : $membership_id})
                 CREATE (m)-[r:FAVSUBJECT {}]->(s)
-                RETURN r,m,s`;
-    const context = {
-      sub_name: sub_name,
-      member_id: memberId,
-    };
-    const result = await driver.executeQuery(query, context);
-    let toSend = [];
-    toSend.push(result.records[0].get("m").properties);
-    // toSend.push(result.records[0].get("r").properties);
-    toSend.push(result.records[0].get("s").properties);
-    console.log(toSend);
-    res.status(200).send(toSend);
-  } catch (error) {
-    res.status(500).send({ Error: error });
-  }
-};
+                RETURN r,m,s
+      `;
+      const createResult = parser.parse(await driver.executeQuery(createQuery, checkContext));
+
+      res.send({message : "Subject added successfully"});
+});
+
 
 export const getLibraryCardInfo = asyncHandler(async (req,res) => {
     const id = req.params.id;

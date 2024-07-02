@@ -15,7 +15,8 @@ export const setlibraryInfo = asyncHandler(async(req,res) => {
          address: $address,
          contact_info: $contact_info,
          opening_hours_sunday : $opening_hours_sunday,
-         opening_hours_otherday : $opening_hours_otherday
+         opening_hours_otherday : $opening_hours_otherday,
+         library_email : $library_email
         }
          RETURN l
     `;

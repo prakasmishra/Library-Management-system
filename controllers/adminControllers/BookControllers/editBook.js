@@ -22,16 +22,14 @@ export const editBook = asyncHandler(async(req,res) => {
 
     // if doesnt exists then return 
     if(resultArray.length === 0){
-        res.status(400).send({message : "Book doesn't exists."});
-        res.end();
-        return;
+        res.status(400);
+        throw new Error("Book doesn't exists.");
     }
 
     // otherwise check if no of copies is updated or not
     else if(bookData.no_of_copies){
         res.status(400);
         throw new Error("Availability/# of copies is not ediitable.");
-        
     }
     // different author , delete prev author rel create if any
     else if(resultArray[0].author_name !== bookData.author_name){
@@ -39,14 +37,17 @@ export const editBook = asyncHandler(async(req,res) => {
         const query = `
         MATCH (book:Book {isbn : $isbn}),
         (author:Author)-[r:WROTE]->(book)
-        DELETE r
+        DELETE r;
+
+        
+
         `;
 
         const result =  await driver.executeQuery(
             query ,
              {
-                isbn : bookData.isbn, 
-                author_name : bookData.author_name
+                isbn : resultArray[0].isbn, 
+                author_name : resultArray[0].author_name
             });
         
         const response = parser.parse(result);
@@ -65,8 +66,8 @@ export const editBook = asyncHandler(async(req,res) => {
 
         const result =  await driver.executeQuery(
             query ,
-             {isbn : bookData.isbn, 
-                sub_name : bookData.sub_name}
+             {isbn : resultArray[0].isbn, 
+                sub_name : resultArray[0].sub_name}
             );
         
         const response = parser.parse(result);
