@@ -11,8 +11,8 @@ const router = express.Router();
 
 router.get("/:id", profileHome);
 router.get("/get/fav-sub/:id", getFavSub);
-router.post("/add/fav-sub/:id", addFavSub);
+router.put("/update/fav-sub/:id", addFavSub);
 router.delete("/remove/fav-sub/:id", removeFavSub);
-router.get("/get/library-card-details/:id",getLibraryCardInfo);
+router.get("/get/library-card-details/:id", getLibraryCardInfo);
 
 export default router;
