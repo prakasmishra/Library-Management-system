@@ -62,7 +62,7 @@ export const wishlistBook = async (req, res) => {
     const checkQueryResult = await driver.executeQuery(helperQuery, params);
     const checkResponse = parser.parse(checkQueryResult);
     if (checkResponse.length == 0) {
-      res.status(200).send({ message: "Member does not exist" });
+      res.status(400).send({ message: "Member does not exist" });
     }
     else {
 
