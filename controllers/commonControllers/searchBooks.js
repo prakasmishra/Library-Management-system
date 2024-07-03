@@ -2,8 +2,9 @@ import driver from "../../utils/neo4j-driver.js";
 import { convertToNeo4jInteger } from "../../utils/neo4j-driver.js";
 import asyncHandler from "express-async-handler";
 import parser from "parse-neo4j";
-import * as queries from './queries.js';
-import { removeStopWords } from "./removeStopWords.js";
+import * as queries from './utils/queries.js';
+import { removeStopWords } from "./utils/removeStopWords.js";
+import { sortBooks } from "./utils/sortAlgorithm.js";
 
 
 
@@ -13,47 +14,28 @@ export const searchBooks = asyncHandler(async (req, res) => {
     
   const stringValue = req.params.string_value.replace(/\+/g, "%20");// replaces '+' with %20
   const decodedStringValue = decodeURIComponent(stringValue);// decodes %20 as ' '
-  // console.log(`String-value-terms = ${decodedStringValue}`);
+
   
   // availability=true/false sortby=edition/popularity
     const { availability, sortby  } = req.query;
-    // console.log(`availability = ${availability} , ${typeof availability} `);
-    // console.log(`sortby = ${sortby}`);
+
     
     
     const limit = convertToNeo4jInteger(process.env.MAX_API_BOOK_LIMIT);
     
-    // querying the db
-    // check for better regex
-    // using subseq
-    //   const regexQuery = decodedStringValue.split('').map(char => `${char}.*`).join('');
-    //   const regex = `(?i).*${regexQuery}`; // Case-insensitive subsequence match
-  
     // const regexQuery
     const regex = removeStopWords(decodedStringValue.split(' ').map(str => str.toLowerCase()));  
-    // console.log("Regex is ", regex);
-    // return;  
+    console.log("Regex is ", regex);
     
     var query;
-    
-    if(availability === "true"  && sortby === "edition") {
-      query = queries.availableAndSortByEditionDesc;
-    }
-    else if(availability === "true"  && sortby === "popularity"){
-      query = queries.availableAndSortByPopularityDesc;
-    }
-    else if(availability === "false"  && sortby === "edition") {
-      query = queries.sortByEditionDesc;
-    }
-    else if(availability === "true"  && sortby === "popularity") {
-      query = queries.sortByPopularityDesc;
+
+    if(availability === "true"){
+       query = queries.availableQuery;
     }
     else{
-       query = queries.sortByPopularityDesc;
+       query = queries.generalQuery;
     }
-    // console.log(query);
   
-    
     
     const resultBooksPromise = await driver
     .executeQuery(
@@ -61,17 +43,30 @@ export const searchBooks = asyncHandler(async (req, res) => {
       {regex : regex,limit : limit}
     )
     .catch((parseError) => {
-      // console.error(`Parsing error: ${parseError}`); 
+      console.error(`Parsing error: ${parseError}`); 
       res.status(500);
       throw new Error("Data parsing error");
     });
     
-    const responseArray = parser.parse(resultBooksPromise);
+    var responseArray = parser.parse(resultBooksPromise);
+
+    if(sortby === "popularity"){
+        responseArray = sortBooks(responseArray,regex,'popularity');
+    }
+    else if(sortby === "edition"){
+      responseArray = sortBooks(responseArray,regex,'edition');
+    }
+    else{
+      responseArray = sortBooks(responseArray,regex,'edition');
+    }
+    
     // console.log("Query result: ", responseArray.length);
     
     res.status(200).send(responseArray);
-  });
-  
+});
+
+
+
 //*********** Using indexes ***************** */
 
 //   export const searchBooks2 = asyncHandler(async(req,res) => {

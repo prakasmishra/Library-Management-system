@@ -1,5 +1,6 @@
 import driver from "../../../utils/neo4j-driver.js";
 import { sendNotificationEmail } from "../../adminControllers/NotificationControllers/notificationController.js";
+import asyncHandler from "express-async-handler";
 
 const limit = 5;
 import parser from "parse-neo4j";
@@ -90,28 +91,41 @@ export const recommendedBooks = async (req, res) => {
   try {
     const subject = req.query.subject;
     if (subject === null || subject === undefined || subject.trim() === "") {
-      const query = `match (b : Book) return b`;
+      const query = `
+      MATCH (book:Book)
+, (author:Author)-[wr:WROTE]->(book)
+, (subject:Subject) -[:CONTAINS]-> (book)
+RETURN book,author.author_name AS author_name,subject.sub_name AS sub_name
+      `;
       const context = {};
       const result = await driver.executeQuery(query, context);
       //   const books = result.records.map((record) => record.get("b").properties);
       const books = parser.parse(result);
       const popularBooks = books
-        .sort((a, b) => b.popularity - a.popularity)
+        .sort((a, b) => b.book.popularity - a.book.popularity)
         .slice(0, limit);
-      popularBooks.forEach((book) => console.log(book.title));
+      popularBooks.forEach((book) => console.log(book.book.title));
       res.status(200).send(popularBooks);
     } else {
-      const query = `MATCH (s:Subject {sub_name : $subject})-[:CONTAINS]->(b : Book) RETURN b`;
+      const query = `
+     MATCH (book:Book)
+  , (author:Author)-[wr:WROTE]->(book)
+  , (subject:Subject)-[:CONTAINS]->(book)
+  WHERE toLower(subject.sub_name) =~ (toLower($subject)) 
+RETURN book, author.author_name AS author_name, subject.sub_name AS sub_name
+
+      `;
       const context = { subject: subject };
       const result = await driver.executeQuery(query, context);
       const books = parser.parse(result);
       const popularBooks = books
-        .sort((a, b) => b.popularity - a.popularity)
+        .sort((a, b) => b.book.popularity - a.book.popularity)
         .slice(0, limit);
-      popularBooks.forEach((book) => console.log(book.title));
+      popularBooks.forEach((book) => console.log(book.book.title));
       res.status(200).send(popularBooks);
     }
   } catch (error) {
+    console.log('Error :',error);
     res.status(500).send({ Error: error });
   }
 };
@@ -135,3 +149,4 @@ export const relatedBooks = async (req, res) => {
     res.status(500).send({ Error: error });
   }
 };
+
