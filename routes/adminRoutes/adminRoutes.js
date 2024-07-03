@@ -22,6 +22,12 @@ import { borrowedThisMonth } from "../../controllers/adminControllers/Statistics
 import { totalOverdue } from "../../controllers/adminControllers/StatisticsControllers/totalOverdue.js";
 import { sendNotificationEmail } from "../../controllers/adminControllers/NotificationControllers/notificationController.js";
 import { notifyOnAvailable } from "../../middlewares/availabilityNotification.js";
+import {
+  getTask,
+  getTaskCount,
+  createTask,
+  markAsRead,
+} from "../../controllers/adminControllers/ETaskControllers/eTask.js";
 
 const router = express.Router();
 
@@ -66,5 +72,11 @@ router.delete("/notice/mark-obsolete/noticeid/:id", obsoleteNotice);
 
 router.put("/set-settings", setlibraryInfo);
 router.get("/get-settings", getlibraryInfo);
+
+// ETaks
+router.post("/add/e-task", createTask);
+router.get("/get/e-task", getTask);
+router.get("/get/e-taskCount", getTaskCount);
+router.put("/mark-as-read/e-task/:id", markAsRead);
 
 export default router;
