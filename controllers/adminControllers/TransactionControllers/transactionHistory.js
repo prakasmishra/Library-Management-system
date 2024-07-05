@@ -26,14 +26,10 @@ export const getHistory = async (req, res) => {
         count=temp;
         // console.log(count);
         let query;
-        if(!memberId && !isbn && !status){
-            // console.log("000");
-            query = `
-            MATCH (m:Member)
-            -[t:TRANSACTION]->(b:Book)
-            WHERE t.status IN ["issued", "returned", "late"] 
 
-             AND
+        const filterByFirstDateQuery = 
+        `
+         AND
              (
                 date(datetime({year: toInteger(split(t.issue_date, '-')[2]), 
                 month: toInteger(split(t.issue_date, '-')[1]), 
@@ -49,13 +45,32 @@ export const getHistory = async (req, res) => {
                     )
     
             )
+        
+        `;
 
+        const returnAfterOrderByDateQuery = 
+        `
+
+        WITH t,b,m,CASE WHEN t.status = 'issued' THEN t.issue_date ELSE t.return_date END as order_date
+
+            ORDER BY date(datetime({ year: toInteger(substring(order_date, 6, 4)), 
+                month: toInteger(substring(order_date, 3, 2)), 
+                day: toInteger(substring(order_date, 0, 2)) })) DESC
 
             RETURN t AS transaction, b.isbn AS isbn, m.membership_id AS memberId
-            ORDER BY date(datetime({ year: toInteger(substring(t.issue_date, 6, 4)), 
-                month: toInteger(substring(t.issue_date, 3, 2)), 
-                day: toInteger(substring(t.issue_date, 0, 2)) })) DESC
-            LIMIT $count`;
+            LIMIT $count;
+        
+        `;
+
+        if(!memberId && !isbn && !status){
+
+            query = `
+            MATCH (m:Member)
+            -[t:TRANSACTION]->(b:Book)
+            WHERE t.status IN ["issued", "returned", "late"] 
+            ` + filterByFirstDateQuery + returnAfterOrderByDateQuery;
+        
+            // console.log("000");
         }
         else if(!memberId && !isbn && status){
             // console.log("001");
@@ -63,31 +78,8 @@ export const getHistory = async (req, res) => {
             MATCH (m:Member )
             -[t:TRANSACTION]->(b:Book )
             WHERE (t.status = $status)
+            ` + filterByFirstDateQuery + returnAfterOrderByDateQuery;
 
-
-            AND
-             (
-                date(datetime({year: toInteger(split(t.issue_date, '-')[2]), 
-                month: toInteger(split(t.issue_date, '-')[1]), 
-                day: toInteger(split(t.issue_date, '-')[0])})) >= date($firstdate)
-
-                OR 
-
-                    (
-                        t.status = 'returned' AND
-                        date(datetime({year: toInteger(split(t.return_date, '-')[2]), 
-                        month: toInteger(split(t.return_date, '-')[1]), 
-                        day: toInteger(split(t.return_date, '-')[0])})) >= date($firstdate)
-                    )
-    
-            )
-
-            
-            RETURN t AS transaction, b.isbn AS isbn, m.membership_id AS memberId
-            ORDER BY date(datetime({ year: toInteger(substring(t.issue_date, 6, 4)), 
-                month: toInteger(substring(t.issue_date, 3, 2)), 
-                day: toInteger(substring(t.issue_date, 0, 2)) })) DESC
-            LIMIT $count`;
         }
         else if(!memberId && isbn && !status){
             // console.log("010");
@@ -95,29 +87,7 @@ export const getHistory = async (req, res) => {
             MATCH (m:Member )
             -[t:TRANSACTION]->(b:Book {isbn: $isbn})
             WHERE t.status IN ["issued", "returned", "late"] 
-
-            AND
-             (
-                date(datetime({year: toInteger(split(t.issue_date, '-')[2]), 
-                month: toInteger(split(t.issue_date, '-')[1]), 
-                day: toInteger(split(t.issue_date, '-')[0])})) >= date($firstdate)
-
-                OR 
-
-                    (
-                        t.status = 'returned' AND
-                        date(datetime({year: toInteger(split(t.return_date, '-')[2]), 
-                        month: toInteger(split(t.return_date, '-')[1]), 
-                        day: toInteger(split(t.return_date, '-')[0])})) >= date($firstdate)
-                    )
-    
-            )
-
-            RETURN t AS transaction, b.isbn AS isbn, m.membership_id AS memberId
-            ORDER BY date(datetime({ year: toInteger(substring(t.issue_date, 6, 4)), 
-                month: toInteger(substring(t.issue_date, 3, 2)), 
-                day: toInteger(substring(t.issue_date, 0, 2)) })) DESC
-            LIMIT $count`;
+            ` + filterByFirstDateQuery + returnAfterOrderByDateQuery;
         }
         else if(!memberId && isbn && status){
             // console.log("011");
@@ -125,30 +95,7 @@ export const getHistory = async (req, res) => {
             MATCH (m:Member )
             -[t:TRANSACTION]->(b:Book {isbn: $isbn})
             WHERE (t.status = $status)
-
-            AND
-             (
-                date(datetime({year: toInteger(split(t.issue_date, '-')[2]), 
-                month: toInteger(split(t.issue_date, '-')[1]), 
-                day: toInteger(split(t.issue_date, '-')[0])})) >= date($firstdate)
-
-                OR 
-
-                    (
-                        t.status = 'returned' AND
-                        date(datetime({year: toInteger(split(t.return_date, '-')[2]), 
-                        month: toInteger(split(t.return_date, '-')[1]), 
-                        day: toInteger(split(t.return_date, '-')[0])})) >= date($firstdate)
-                    )
-    
-            )
-
-
-            RETURN t AS transaction, b.isbn AS isbn, m.membership_id AS memberId
-            ORDER BY date(datetime({ year: toInteger(substring(t.issue_date, 6, 4)), 
-                month: toInteger(substring(t.issue_date, 3, 2)), 
-                day: toInteger(substring(t.issue_date, 0, 2)) })) DESC
-            LIMIT $count`;
+            ` + filterByFirstDateQuery + returnAfterOrderByDateQuery;
         }
         else if(memberId && !isbn && !status){
             // console.log("100");
@@ -156,31 +103,8 @@ export const getHistory = async (req, res) => {
             MATCH (m:Member {membership_id: $memberId})
             -[t:TRANSACTION]->(b:Book )
             WHERE t.status IN ["issued", "returned", "late"] 
+            ` + filterByFirstDateQuery + returnAfterOrderByDateQuery;
 
-
-            AND
-             (
-                date(datetime({year: toInteger(split(t.issue_date, '-')[2]), 
-                month: toInteger(split(t.issue_date, '-')[1]), 
-                day: toInteger(split(t.issue_date, '-')[0])})) >= date($firstdate)
-
-                OR 
-
-                    (
-                        t.status = 'returned' AND
-                        date(datetime({year: toInteger(split(t.return_date, '-')[2]), 
-                        month: toInteger(split(t.return_date, '-')[1]), 
-                        day: toInteger(split(t.return_date, '-')[0])})) >= date($firstdate)
-                    )
-    
-            )
-
-
-            RETURN t as transaction, b.isbn AS isbn, m.membership_id AS memberId
-            ORDER BY date(datetime({ year: toInteger(substring(t.issue_date, 6, 4)), 
-                month: toInteger(substring(t.issue_date, 3, 2)), 
-                day: toInteger(substring(t.issue_date, 0, 2)) })) DESC
-            LIMIT $count`;
         }
         else if(memberId && !isbn && status){
             // console.log("101");
@@ -188,31 +112,8 @@ export const getHistory = async (req, res) => {
             MATCH (m:Member {membership_id: $memberId})
             -[t:TRANSACTION]->(b:Book )
             WHERE (t.status = $status)
+            ` + filterByFirstDateQuery + returnAfterOrderByDateQuery;
 
-
-            AND
-             (
-                date(datetime({year: toInteger(split(t.issue_date, '-')[2]), 
-                month: toInteger(split(t.issue_date, '-')[1]), 
-                day: toInteger(split(t.issue_date, '-')[0])})) >= date($firstdate)
-
-                OR 
-
-                    (
-                        t.status = 'returned' AND
-                        date(datetime({year: toInteger(split(t.return_date, '-')[2]), 
-                        month: toInteger(split(t.return_date, '-')[1]), 
-                        day: toInteger(split(t.return_date, '-')[0])})) >= date($firstdate)
-                    )
-    
-            )
-
-
-            RETURN t AS transaction, b.isbn AS isbn, m.membership_id AS memberId
-            ORDER BY date(datetime({ year: toInteger(substring(t.issue_date, 6, 4)), 
-                month: toInteger(substring(t.issue_date, 3, 2)), 
-                day: toInteger(substring(t.issue_date, 0, 2)) })) DESC
-            LIMIT $count`;
         }
         else if (memberId && isbn && !status) {
             // console.log("110");
@@ -220,31 +121,7 @@ export const getHistory = async (req, res) => {
             MATCH (m:Member {membership_id: $memberId})
             -[t:TRANSACTION]->(b:Book {isbn: $isbn})
             WHERE t.status IN ["issued", "returned", "late"] 
-
-
-            AND
-             (
-                date(datetime({year: toInteger(split(t.issue_date, '-')[2]), 
-                month: toInteger(split(t.issue_date, '-')[1]), 
-                day: toInteger(split(t.issue_date, '-')[0])})) >= date($firstdate)
-
-                OR 
-
-                    (
-                        t.status = 'returned' AND
-                        date(datetime({year: toInteger(split(t.return_date, '-')[2]), 
-                        month: toInteger(split(t.return_date, '-')[1]), 
-                        day: toInteger(split(t.return_date, '-')[0])})) >= date($firstdate)
-                    )
-    
-            )
-
-
-            RETURN t AS transaction, b.isbn AS isbn, m.membership_id AS memberId
-            ORDER BY date(datetime({ year: toInteger(substring(t.issue_date, 6, 4)), 
-                month: toInteger(substring(t.issue_date, 3, 2)), 
-                day: toInteger(substring(t.issue_date, 0, 2)) })) DESC
-            LIMIT $count`;
+            ` + filterByFirstDateQuery + returnAfterOrderByDateQuery;
         }
         else {
             // console.log("111");
@@ -252,29 +129,7 @@ export const getHistory = async (req, res) => {
             MATCH (m:Member {membership_id: $memberId})
             -[t:TRANSACTION]->(b:Book {isbn: $isbn})
             WHERE (t.status = $status)
-
-            AND
-             (
-                date(datetime({year: toInteger(split(t.issue_date, '-')[2]), 
-                month: toInteger(split(t.issue_date, '-')[1]), 
-                day: toInteger(split(t.issue_date, '-')[0])})) >= date($firstdate)
-
-                OR 
-
-                    (
-                        t.status = 'returned' AND
-                        date(datetime({year: toInteger(split(t.return_date, '-')[2]), 
-                        month: toInteger(split(t.return_date, '-')[1]), 
-                        day: toInteger(split(t.return_date, '-')[0])})) >= date($firstdate)
-                    )
-    
-            )
-
-            RETURN t AS transaction, b.isbn AS isbn, m.membership_id AS memberId
-            ORDER BY date(datetime({ year: toInteger(substring(t.issue_date, 6, 4)), 
-                month: toInteger(substring(t.issue_date, 3, 2)), 
-                day: toInteger(substring(t.issue_date, 0, 2)) })) DESC
-            LIMIT $count`;
+            ` + filterByFirstDateQuery + returnAfterOrderByDateQuery;
         }
         
         const params = {
