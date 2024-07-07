@@ -179,7 +179,7 @@ export const getLibraryCardInfo = asyncHandler(async (req, res) => {
                   [transaction:TRANSACTION {status : 'issued'}]->
                   (book:Book),
                   (author:Author)-[:WROTE]->(book)
-                  RETURN transaction,book.title as book_title, author.author_name as author_name
+                  RETURN transaction,book.isbn as isbn,book.title as book_title, author.author_name as author_name
     `;
 
   const result = parser.parse(
@@ -197,6 +197,7 @@ export const getLibraryCardInfo = asyncHandler(async (req, res) => {
       status: "occupied",
       issue_date: obj.transaction.issue_date,
       due_date: obj.transaction.due_date,
+      isbn : obj.isbn,
       book_title: obj.book_title,
       author_name: obj.author_name,
     };
