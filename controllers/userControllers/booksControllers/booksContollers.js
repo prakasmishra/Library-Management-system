@@ -52,6 +52,7 @@ export const wishlistBook = async (req, res) => {
   try {
     const memberId = req.params.memberId;
     const isbn = req.params.isbn;
+
     const checkQuery = `MATCH (m:Member{membership_id: $member_id}) RETURN m.membership_id`;
 
     const helperQuery = `
@@ -63,7 +64,7 @@ export const wishlistBook = async (req, res) => {
       member_id: memberId,
       isbn: isbn,
     };
-    const checkQueryResult = await driver.executeQuery(helperQuery, params);
+    const checkQueryResult = await driver.executeQuery(checkQuery, params);
     const checkResponse = parser.parse(checkQueryResult);
     if (checkResponse.length == 0) {
       res.status(400).send({ message: "Member does not exist" });

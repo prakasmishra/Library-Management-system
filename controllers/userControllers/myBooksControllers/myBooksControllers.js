@@ -33,6 +33,7 @@ export const wishlistedBooks = async (req, res) => {
     try {
         const memberId = req.params.memberId;
 
+
         const query = `
         MATCH (m:Member {membership_id: $member_id})-[:WISHLIST]->(b:Book)
         OPTIONAL MATCH (a:Author)-[:WROTE]->(b)
