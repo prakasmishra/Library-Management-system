@@ -48,8 +48,7 @@ export const reserveBook = async (req, res) => {
   }
 };
 
-export const wishlistBook = async (req, res) => {
-  try {
+export const addWishlistBook = asyncHandler( async (req, res) => {
     const memberId = req.params.memberId;
     const isbn = req.params.isbn;
 
@@ -79,15 +78,63 @@ export const wishlistBook = async (req, res) => {
         MERGE (member)-[:WISHLIST]->(book)`;
 
         const result = await driver.executeQuery(query, params);
-        res.status(200).send({ message: "wishlisted" });
+        if(result.length === 0){
+           res.status(500);
+           throw new Error("Error in wishlisting");
+        }
+        res.status(200).send({ message: "wishlisted successfully" });
       } else {
-        res.status(200).send({ message: "Already in your wishlist" });
+        res.status(400).send({ message: "Already in your wishlist" });
       }
     }
-  } catch (error) {
-    console.error("Something went wrong:", error);
-  }
-};
+});
+
+
+export const removeWishlistBook = asyncHandler(async (req, res) => {
+    const memberId = req.params.memberId;
+    const isbn = req.params.isbn;
+
+    const checkQuery = `MATCH (m:Member{membership_id: $member_id}) RETURN m.membership_id`;
+
+    const helperQuery = `
+        MATCH (m:Member{membership_id: $member_id}) 
+        -[:WISHLIST]-> (book:Book {isbn: $isbn})
+        RETURN m.membership_id AS id`;
+
+    const params = {
+      member_id: memberId,
+      isbn: isbn,
+    };
+    const checkQueryResult = await driver.executeQuery(checkQuery, params);
+    const checkResponse = parser.parse(checkQueryResult);
+    if (checkResponse.length == 0) {
+      res.status(400).send({ message: "Member does not exist" });
+    }
+    else {
+
+      const helperResult = await driver.executeQuery(helperQuery, params);
+      const response = parser.parse(helperResult);
+      if (response.length === 0) {
+        res.status(400);
+        throw new Error("Book is not wishlisted");
+      } else {
+        
+        const query = `
+        MATCH (:Member {membership_id: $member_id})-[r:WISHLIST]->(:Book {isbn: $isbn})
+        DELETE r`;
+
+        const result = await driver.executeQuery(query, params);
+        if(result.length === 0){
+          res.status(500);
+          throw new Error("Error in un-wishlisting");
+        }
+        res.status(200).send({ message: "Book removed from wishlist successfully." });
+      }
+    }
+});
+
+
+
 export const recommendedBooks = async (req, res) => {
   try {
     const subject = req.query.subject;
