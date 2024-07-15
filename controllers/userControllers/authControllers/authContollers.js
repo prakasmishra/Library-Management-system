@@ -14,14 +14,14 @@ export const addUserDetails = async (req, res) => {
       sex,
       phone_number,
       email,
+      imageUrl,
     } = req.body;
 
     // generate library card string
     const library_card_count = process.env.MAX_LIBRARY_CARD_COUNT;
-    const library_card_string = '0'.repeat(library_card_count);
+    const library_card_string = "0".repeat(library_card_count);
 
-    console.log("library card string ",library_card_string);
-    
+    console.log("library card string ", library_card_string);
 
     const status = "pending";
     const q = `
@@ -39,7 +39,8 @@ export const addUserDetails = async (req, res) => {
         m.sex = $sex,
         m.phone_number = $phone_number,
         m.email = $email,
-        m.status= $status
+        m.status= $status,
+        m.imageUrl = $imageUrl
     RETURN m`;
 
     const context = {
@@ -54,6 +55,7 @@ export const addUserDetails = async (req, res) => {
       address: address,
       sex: sex,
       join_date: join_date,
+      imageUrl: imageUrl,
     };
     console.log("hello");
     const result = await driver.executeQuery(query, context);
