@@ -2,7 +2,6 @@ const TTL = 5;
 import driver from "../../../utils/neo4j-driver.js";
 import ShortUniqueId from "short-unique-id";
 import parser from "parse-neo4j";
-import { query } from "express";
 
 export const createTask = async (req, res) => {
   try {
