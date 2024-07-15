@@ -48,10 +48,10 @@ export const reserveBook = async (req, res) => {
   }
 };
 
-export const wishlistBook = async (req, res) => {
-  try {
+export const addWishlistBook = asyncHandler( async (req, res) => {
     const memberId = req.params.memberId;
     const isbn = req.params.isbn;
+
     const checkQuery = `MATCH (m:Member{membership_id: $member_id}) RETURN m.membership_id`;
 
     const helperQuery = `
@@ -63,7 +63,7 @@ export const wishlistBook = async (req, res) => {
       member_id: memberId,
       isbn: isbn,
     };
-    const checkQueryResult = await driver.executeQuery(helperQuery, params);
+    const checkQueryResult = await driver.executeQuery(checkQuery, params);
     const checkResponse = parser.parse(checkQueryResult);
     if (checkResponse.length == 0) {
       res.status(400).send({ message: "Member does not exist" });
@@ -78,15 +78,63 @@ export const wishlistBook = async (req, res) => {
         MERGE (member)-[:WISHLIST]->(book)`;
 
         const result = await driver.executeQuery(query, params);
-        res.status(200).send({ message: "wishlisted" });
+        if(result.length === 0){
+           res.status(500);
+           throw new Error("Error in wishlisting");
+        }
+        res.status(200).send({ message: "wishlisted successfully" });
       } else {
-        res.status(200).send({ message: "Already in your wishlist" });
+        res.status(400).send({ message: "Already in your wishlist" });
       }
     }
-  } catch (error) {
-    console.error("Something went wrong:", error);
-  }
-};
+});
+
+
+export const removeWishlistBook = asyncHandler(async (req, res) => {
+    const memberId = req.params.memberId;
+    const isbn = req.params.isbn;
+
+    const checkQuery = `MATCH (m:Member{membership_id: $member_id}) RETURN m.membership_id`;
+
+    const helperQuery = `
+        MATCH (m:Member{membership_id: $member_id}) 
+        -[:WISHLIST]-> (book:Book {isbn: $isbn})
+        RETURN m.membership_id AS id`;
+
+    const params = {
+      member_id: memberId,
+      isbn: isbn,
+    };
+    const checkQueryResult = await driver.executeQuery(checkQuery, params);
+    const checkResponse = parser.parse(checkQueryResult);
+    if (checkResponse.length == 0) {
+      res.status(400).send({ message: "Member does not exist" });
+    }
+    else {
+
+      const helperResult = await driver.executeQuery(helperQuery, params);
+      const response = parser.parse(helperResult);
+      if (response.length === 0) {
+        res.status(400);
+        throw new Error("Book is not wishlisted");
+      } else {
+        
+        const query = `
+        MATCH (:Member {membership_id: $member_id})-[r:WISHLIST]->(:Book {isbn: $isbn})
+        DELETE r`;
+
+        const result = await driver.executeQuery(query, params);
+        if(result.length === 0){
+          res.status(500);
+          throw new Error("Error in un-wishlisting");
+        }
+        res.status(200).send({ message: "Book removed from wishlist successfully." });
+      }
+    }
+});
+
+
+
 export const recommendedBooks = async (req, res) => {
   try {
     const subject = req.query.subject;
@@ -135,15 +183,16 @@ export const relatedBooks = async (req, res) => {
   try {
     const isbn = req.params.isbn;
     // console.log(isbn);
-    const query = `MATCH (: Book {isbn : $isbn})<-[:CONTAINS]-(s:Subject)-[:CONTAINS]->(b: Book)
-    RETURN b`;
+    const query = `MATCH (: Book {isbn : $isbn})<-[:CONTAINS]-(subject:Subject)-[:CONTAINS]->(book: Book),
+    (book)<-[:WROTE]-(author:Author) RETURN book, author.author_name AS author_name, subject.sub_name AS sub_name
+    `;
     const context = { isbn: isbn };
     const result = await driver.executeQuery(query, context);
     const books = parser.parse(result);
     const popularBooks = books
       .sort((a, b) => b.popularity - a.popularity)
       .slice(0, limit);
-      popularBooks.forEach((book) => console.log(book.title));
+      popularBooks.forEach((book) => console.log(book.book.title));
       res.status(200).send(popularBooks);
   } catch (error) {
     res.status(500).send({ Error: error });

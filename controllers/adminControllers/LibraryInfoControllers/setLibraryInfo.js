@@ -17,7 +17,7 @@ export const setlibraryInfo = asyncHandler(async(req,res) => {
          opening_hours_sunday : $opening_hours_sunday,
          opening_hours_otherday : $opening_hours_otherday,
          library_email : $library_email
-g        }
+        }
          RETURN l
     `;
     const result = await driver.executeQuery(query,info);
