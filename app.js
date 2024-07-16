@@ -37,10 +37,20 @@ app.use("/api/admin", adminRoutes);
 // common for search books
 app.use("/api/common", commonRoutes);
 
+
+import someRoute from './demo/someRoute.js';
+app.use('/api/demo',someRoute);
+
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+
+
+
+import { attachAdminSocket } from "./sockets/admin.js";
+const adminSocketServer = attachAdminSocket(app);
+
+adminSocketServer.listen(PORT, () => {
   connectToDB();
   const d = new Date();
   console.log(`Server listening on port http://localhost:${PORT} on ${d}`);
