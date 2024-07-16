@@ -15,7 +15,7 @@ export const profileHome = async (req, res) => {
     const res1 = await driver.executeQuery(memberQuery, context);
     const res2 = await driver.executeQuery(deptQuery, context);
     const res3 = await axios.get(
-      `https://library-management-system-f9gh.onrender.com/api/user/profile/get/fav-sub/${id}`
+      `https://library-management-system-ce6z.onrender.com/api/user/profile/get/fav-sub/${id}`
     );
     const memberDetails = parser.parse(res1);
     const deptDetails = parser.parse(res2);
