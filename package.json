@@ -23,6 +23,7 @@
     "nodemailer": "^6.9.14",
     "parse-neo4j": "^0.6.11",
     "short-unique-id": "^5.2.0",
-    "socket.io": "^4.7.5"
+    "socket.io": "^4.7.5",
+    "twilio": "^5.2.2"
   }
 }
