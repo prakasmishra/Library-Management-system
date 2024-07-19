@@ -2,6 +2,7 @@ import axios from "axios";
 import driver from "../../../utils/neo4j-driver.js";
 import parser from "parse-neo4j";
 import asyncHandler from "express-async-handler";
+import { ROOT_URL } from "../../../config.js";
 
 export const profileHome = async (req, res) => {
   const id = req.params.id;
@@ -15,7 +16,7 @@ export const profileHome = async (req, res) => {
     const res1 = await driver.executeQuery(memberQuery, context);
     const res2 = await driver.executeQuery(deptQuery, context);
     const res3 = await axios.get(
-      `https://library-management-system-f9gh.onrender.com/api/user/profile/get/fav-sub/${id}`
+      `${ROOT_URL}/api/user/profile/get/fav-sub/${id}`
     );
     const memberDetails = parser.parse(res1);
     const deptDetails = parser.parse(res2);
@@ -101,7 +102,7 @@ export const addFavSub = asyncHandler(async (req, res) => {
     }
 
     const currFavSubCall = await axios.get(
-      `https://library-management-system-f9gh.onrender.com/api/user/profile/get/fav-sub/${memberId}`
+      `${ROOT_URL}/api/user/profile/get/fav-sub/${memberId}`
     );
     const currFavSub = currFavSubCall.data;
     for (const oldSub of currFavSub) {
@@ -146,7 +147,7 @@ export const addFavSub = asyncHandler(async (req, res) => {
     }
 
     const newFavSub = await axios.get(
-      `https://library-management-system-f9gh.onrender.com/api/user/profile/get/fav-sub/${memberId}`
+      `${ROOT_URL}/api/user/profile/get/fav-sub/${memberId}`
     );
 
     console.log("New Fav : ", newFavSub.data);
@@ -197,7 +198,7 @@ export const getLibraryCardInfo = asyncHandler(async (req, res) => {
       status: "occupied",
       issue_date: obj.transaction.issue_date,
       due_date: obj.transaction.due_date,
-      isbn : obj.isbn,
+      isbn: obj.isbn,
       book_title: obj.book_title,
       author_name: obj.author_name,
     };

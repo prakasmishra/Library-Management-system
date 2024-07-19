@@ -28,6 +28,11 @@ import {
   createTask,
   markAsRead,
 } from "../../controllers/adminControllers/ETaskControllers/eTask.js";
+import { verifyMember } from "../../controllers/adminControllers/verificationControllers/verifyMember.js";
+import {
+  getAdminDetails,
+  updateAdminDetails,
+} from "../../controllers/adminControllers/profileControllers/profile.js";
 import { createETask, deleteEtask, getEtask, getETaskCount } from "../../controllers/adminControllers/ETaskControllers/eTaskControllers.js";
 
 const router = express.Router();
@@ -75,6 +80,17 @@ router.put("/set-settings", setlibraryInfo);
 router.get("/get-settings", getlibraryInfo);
 
 // ETaks
+router.post("/add/e-task", createTask);
+router.get("/get/e-task", getTask);
+router.get("/get/e-taskCount", getTaskCount);
+router.put("/mark-as-read/e-task/:id", markAsRead);
+
+// for member-verification
+router.post("/verify-member/:id", verifyMember);
+
+// for admin profile
+router.put("/update/profile", updateAdminDetails);
+router.get("/profile/:emp_id", getAdminDetails);
 // router.post("/add/e-task", createTask);
 // router.get("/get/e-task", getTask);
 // router.get("/get/e-taskCount", getTaskCount);
