@@ -18,8 +18,10 @@ export const issueBook = asyncHandler(async(req,res) => {
     transactionData.issue_date = issue_date;
     console.log("Issue date : ",issue_date);
 
-    const due_time_in_day = process.env.DUE_DAY_COUNT;
+    const due_time_in_day = parseInt(process.env.DUE_DAY_COUNT, 10);
+    console.log("count ",due_time_in_day);
     const due_date = addDaysToDate(transactionData.issue_date,due_time_in_day);
+
     transactionData.due_date = due_date;
 
     // add renewal count
@@ -146,9 +148,23 @@ export const issueBook = asyncHandler(async(req,res) => {
             throw new Error("Failed to create new issue tx");
         }
 
-        res.status(200).send({message : "Book issued successfully(Not booked,directly issued)"});
+        console.log("issue ",parsedResult3[0]);
+
+        const response = {
+            message : "Book issued successfully(Not booked,directly issued)",
+            due_date : parsedResult3[0].due_date            
+        }
+
+        res.status(200).send(response);
         return;
-    }   
-    res.send({message : "Book issued successfully(formaly booked,not issued)"});
+    }  
+    
+    const response = {
+        message : "Book issued successfully(formaly booked,not issued)",
+        due_date : parsedResult2[0].due_date            
+    }
+
+
+    res.send(response);
 })
 

@@ -8,7 +8,7 @@ export const attachAdminSocket = function (app) {
     const httpServer = createServer(app);
     const io = new Server(httpServer,{
         cors: {
-          origin: true,
+          origin: "http://localhost:3000",
           methods: ["GET", "POST"]
         }
       });
@@ -17,6 +17,10 @@ export const attachAdminSocket = function (app) {
 
     admin.on('connection' , (socket)=>{
         console.log(`someone connected with ${socket.id}`);
+
+        socket.on('disconnect',()=>{
+            console.log('socket disconnected ',socket.id)
+        })
     })
 
     return httpServer;

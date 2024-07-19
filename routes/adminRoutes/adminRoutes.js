@@ -28,6 +28,7 @@ import {
   createTask,
   markAsRead,
 } from "../../controllers/adminControllers/ETaskControllers/eTask.js";
+import { createETask, deleteEtask, getEtask, getETaskCount } from "../../controllers/adminControllers/ETaskControllers/eTaskControllers.js";
 
 const router = express.Router();
 
@@ -74,9 +75,17 @@ router.put("/set-settings", setlibraryInfo);
 router.get("/get-settings", getlibraryInfo);
 
 // ETaks
-router.post("/add/e-task", createTask);
-router.get("/get/e-task", getTask);
-router.get("/get/e-taskCount", getTaskCount);
-router.put("/mark-as-read/e-task/:id", markAsRead);
+// router.post("/add/e-task", createTask);
+// router.get("/get/e-task", getTask);
+// router.get("/get/e-taskCount", getTaskCount);
+// router.put("/mark-as-read/e-task/:id", markAsRead);
+
+// Etasks
+router.post("/etask/create", createETask);
+router.delete("/etask/delete/:id", deleteEtask);
+router.get("/etask/get-all", getEtask);
+router.get("/etask/get-count", getETaskCount);
+
+
 
 export default router;

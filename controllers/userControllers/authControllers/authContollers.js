@@ -1,8 +1,14 @@
 import driver from "../../../utils/neo4j-driver.js";
 import parser from "parse-neo4j";
+import { generateEtask } from "../../commonControllers/generateEtask.js";
+import { sendEtaskToAdmin } from "../../../sockets/admin.js";
+import {formatDate } from "../../../utils/formatDate.js";
 
 export const addUserDetails = async (req, res) => {
   try {
+
+    console.log(req.body);
+
     const {
       roll,
       dept,
@@ -23,15 +29,22 @@ export const addUserDetails = async (req, res) => {
 
     console.log("library card string ", library_card_string);
 
-    const status = "pending";
+    let status = "pending";
+
+
     const q = `
     MATCH (m:Member {membership_id: $membership_id}) 
-    RETURN m.membership_id as id`;
+    RETURN m`;
     const r = await driver.executeQuery(q, { membership_id: library_card_no });
     const response = parser.parse(r);
+    
+    if(response.length !== 0){
+        status = response[0].status ? response[0].status : "pending";
+    }
+
     const query = `MERGE (m:Member {membership_id: $membership_id})
     SET m.library_card_string=$library_card_string,
-    m.roll = $roll,
+        m.roll = $roll,
         m.address = $address,
         m.join_date = $join_date,
         m.first_name = $first_name,
@@ -57,24 +70,64 @@ export const addUserDetails = async (req, res) => {
       join_date: join_date,
       imageUrl: imageUrl,
     };
-    console.log("hello");
+
     const result = await driver.executeQuery(query, context);
     const member = parser.parse(result);
-    console.log(result);
-    console.log();
+    
+    console.log("here");
+    console.log(member);
+    // for verification///////////////////////////
+    const today = formatDate(new Date());
+
+    const etaskObj = {
+      title : "Account Verification",
+      description : "For account verification of user",
+      due_date : today,
+      type : "account-verification",
+      additional_details : {      
+        first_name :member[0].first_name,
+        last_name : member[0].last_name,
+        roll : member[0].roll,
+        join_date : member[0].join_date,
+        lib_card_no : member[0].lib_card_no,
+        email : member[0].email,
+        phone_number : member[0].phone_number
+      }
+    }
+    
+    const createdEtask = await generateEtask(etaskObj);
+    
+    sendEtaskToAdmin(etaskObj);
+    ///////////////////////////////////////
+    
+    console.log("there");
+
+   
     if (response.length == 0) {
-      const deptQuery = `MATCH (m:Member {membership_id: $membership_id}), 
-                        (d:Department {dept_id : $dept})
-                        CREATE (m)-[:ENROLLED_IN]->(d)
-                        return m,d`;
-      const deptContext = { membership_id: library_card_no, dept: dept };
-      const deptRes = await driver.executeQuery(deptQuery, deptContext);
-      console.log("Success");
-      res.send({ message: "Details added Successfully" }).status(200);
+        const deptQuery = `MATCH (m:Member {membership_id: $membership_id}), 
+                          (d:Department {dept_id : $dept})
+                          CREATE (m)-[:ENROLLED_IN]->(d)
+                          return m,d`;
+        const deptContext = { membership_id: library_card_no, dept: dept };
+        const deptRes = parser.parse(await driver.executeQuery(deptQuery, deptContext));
+
+        if(deptRes.length === 0){
+           res.status(500).send({message : "Server error"});
+        }
+
+        console.log("Success");
+        res.send({ message: "Details added Successfully" }).status(200);
     } else {
       res.send({ message: "Details updated Successfully" }).status(200);
     }
+
+
+    //1.generate etask for account verification and send it to admin
+
+    
+
+
   } catch (error) {
-    res.send({ Error: error }).status(500);
+    res.send({ message : error.message }).status(500);
   }
 };

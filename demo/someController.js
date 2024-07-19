@@ -13,9 +13,10 @@ export const someController = expressAsyncHandler(async(req,res)=>{
     }
     
     // performs some db operation;
+    // etask creation
 
     sendEtaskToAdmin(etask);
 
-    res.send({message : 'for admin socket'});
+    res.send({message : 'Registration pending...'});
 
 })
