@@ -7,12 +7,12 @@ const notify = async (isbn, title) => {
   const context = { isbn: isbn };
   const response = await driver.executeQuery(findMemberQuery, context);
   const members = parser.parse(response);
-  const mesasgeBody = `Your Book with title ${title} is available`;
+  const mesasgeBody = `Your Book with title ${title} is available in the library`;
   members.forEach((member) => {
     console.log(member.membership_id);
-    console.log(member.phone_number);
+    console.log(`whatsapp:+91${member.phone_number}`);
     console.log("Whatsapp api");
-    sendMessge(member.phone_number, mesasgeBody);
+    sendMessge(`whatsapp:+91${member.phone_number}`, mesasgeBody);
   });
 };
 
