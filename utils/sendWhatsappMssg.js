@@ -1,4 +1,5 @@
-import { ACCOOUNT_SID, AUTH_TOKEN } from "../config";
+import { ACCOOUNT_SID, AUTH_TOKEN } from "../config.js";
+import twilio from "twilio";
 
 const accountSid = ACCOOUNT_SID;
 const authToken = AUTH_TOKEN;

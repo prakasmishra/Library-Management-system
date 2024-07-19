@@ -29,6 +29,10 @@ import {
   markAsRead,
 } from "../../controllers/adminControllers/ETaskControllers/eTask.js";
 import { verifyMember } from "../../controllers/adminControllers/verificationControllers/verifyMember.js";
+import {
+  getAdminDetails,
+  updateAdminDetails,
+} from "../../controllers/adminControllers/profileControllers/profile.js";
 
 const router = express.Router();
 
@@ -80,8 +84,11 @@ router.get("/get/e-task", getTask);
 router.get("/get/e-taskCount", getTaskCount);
 router.put("/mark-as-read/e-task/:id", markAsRead);
 
-
 // for member-verification
-router.post("/verify-member/:id",verifyMember);
+router.post("/verify-member/:id", verifyMember);
+
+// for admin profile
+router.put("/update/profile", updateAdminDetails);
+router.get("/profile/:emp_id", getAdminDetails);
 
 export default router;

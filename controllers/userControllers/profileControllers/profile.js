@@ -2,7 +2,7 @@ import axios from "axios";
 import driver from "../../../utils/neo4j-driver.js";
 import parser from "parse-neo4j";
 import asyncHandler from "express-async-handler";
-import { ROOT_URL } from "../../../constants.js";
+import { ROOT_URL } from "../../../config.js";
 
 export const profileHome = async (req, res) => {
   const id = req.params.id;
