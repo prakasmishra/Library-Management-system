@@ -1,5 +1,6 @@
 import {createServer} from 'http';
 import {Server} from 'socket.io';
+import { FRONTEND_URL } from '../config.js';
 
 
 var admin = null;
@@ -8,7 +9,7 @@ export const attachAdminSocket = function (app) {
     const httpServer = createServer(app);
     const io = new Server(httpServer,{
         cors: {
-          origin: "http://localhost:3000",
+          origin: FRONTEND_URL,
           methods: ["GET", "POST"]
         }
       });

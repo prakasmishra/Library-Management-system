@@ -29,7 +29,7 @@ export const addUserDetails = async (req, res) => {
 
     console.log("library card string ", library_card_string);
 
-    let status = "pending";
+    let status;
 
 
     const q = `
@@ -95,9 +95,13 @@ export const addUserDetails = async (req, res) => {
       }
     }
     
-    const createdEtask = await generateEtask(etaskObj);
+
+    if(status === "pending"){
+      const createdEtask = await generateEtask(etaskObj);
+      sendEtaskToAdmin(etaskObj);
+    }
+
     
-    sendEtaskToAdmin(etaskObj);
     ///////////////////////////////////////
     
     console.log("there");
