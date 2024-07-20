@@ -22,12 +22,6 @@ import { borrowedThisMonth } from "../../controllers/adminControllers/Statistics
 import { totalOverdue } from "../../controllers/adminControllers/StatisticsControllers/totalOverdue.js";
 import { sendNotificationEmail } from "../../controllers/adminControllers/NotificationControllers/notificationController.js";
 import { notifyOnAvailable } from "../../middlewares/availabilityNotification.js";
-import {
-  getTask,
-  getTaskCount,
-  createTask,
-  markAsRead,
-} from "../../controllers/adminControllers/ETaskControllers/eTask.js";
 import { verifyMember } from "../../controllers/adminControllers/verificationControllers/verifyMember.js";
 import {
   getAdminDetails,
@@ -80,10 +74,10 @@ router.put("/set-settings", setlibraryInfo);
 router.get("/get-settings", getlibraryInfo);
 
 // ETaks
-router.post("/add/e-task", createTask);
-router.get("/get/e-task", getTask);
-router.get("/get/e-taskCount", getTaskCount);
-router.put("/mark-as-read/e-task/:id", markAsRead);
+// router.post("/add/e-task", createTask);
+// router.get("/get/e-task", getTask);
+// router.get("/get/e-taskCount", getTaskCount);
+// router.put("/mark-as-read/e-task/:id", markAsRead);
 
 // for member-verification
 router.post("/verify-member/:id", verifyMember);
@@ -91,10 +85,7 @@ router.post("/verify-member/:id", verifyMember);
 // for admin profile
 router.put("/update/profile", updateAdminDetails);
 router.get("/profile/:emp_id", getAdminDetails);
-// router.post("/add/e-task", createTask);
-// router.get("/get/e-task", getTask);
-// router.get("/get/e-taskCount", getTaskCount);
-// router.put("/mark-as-read/e-task/:id", markAsRead);
+
 
 // Etasks
 router.post("/etask/create", createETask);
