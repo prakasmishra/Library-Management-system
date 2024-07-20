@@ -7,6 +7,7 @@ var admin = null;
 
 export const attachAdminSocket = function (app) {
     const httpServer = createServer(app);
+    console.log("cors is configuring to ",FRONTEND_URL);
     const io = new Server(httpServer,{
         cors: {
           origin: FRONTEND_URL,
