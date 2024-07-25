@@ -29,7 +29,7 @@ export const addUserDetails = async (req, res) => {
 
     console.log("library card string ", library_card_string);
 
-    let status;
+    let status = "pending";
 
 
     const q = `
