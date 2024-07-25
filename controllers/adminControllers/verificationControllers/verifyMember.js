@@ -8,7 +8,8 @@ import parser from 'parse-neo4j';
 export const verifyMember = asyncHandler(async(req,res) => {
 
   const id = req.params.id;  
-  console.log("member_id : ", id);
+  const {status } = req.query;
+  console.log(`id ${id} status ${status}`);
 
   const queryMember = `MATCH (member:Member {membership_id : $member_id})
                   RETURN member
@@ -24,21 +25,50 @@ export const verifyMember = asyncHandler(async(req,res) => {
 
 //   console.log(resultMember);
 
-  const query = `MATCH (member:Member {membership_id : $member_id})
-                 SET member.status = 'active'
-                 RETURN member 
-    `;
+  if(status === 'reject'){
+      // delete the user
+      const query = `MATCH (member:Member {membership_id : $member_id})
+                     DETACH DELETE member
+                     RETURN TRUE 
+      `;
 
-  const result = parser.parse(
-    await driver.executeQuery(query, { member_id: id })
-  );
+      const result = parser.parse(
+        await driver.executeQuery(query, { member_id: id })
+      );
 
-  if(result.length === 0){
-    res.status(500);
-    throw new Error("Server error");
+      if(result.length === 0){
+        res.status(500);
+        throw new Error("Server error");
+      }
+
+        console.log(result[0]);
+
+        res.status(200).send({ message : "member deleted successfully"});
   }
 
-    console.log(result[0]);
+  else if(status === "active"){
+    const query = `MATCH (member:Member {membership_id : $member_id})
+                   SET member.status = 'active'
+                   RETURN member 
+      `;
+  
+    const result = parser.parse(
+      await driver.executeQuery(query, { member_id: id })
+    );
+  
+    if(result.length === 0){
+      res.status(500);
+      throw new Error("Server error");
+    }
+  
+      console.log(result[0]);
+  
+      res.status(200).send({ message : "member status updated successfully"});
 
-    res.status(200).send({ message : "member status updated successfully"});
+  }
+  else{
+     res.status(400);
+     throw new Error("Wrong status");
+  }
+
 })
